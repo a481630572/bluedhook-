@@ -71,60 +71,21 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
         }
     }
 
-    @Override
-    public void handleInitPackageResources(XC_InitPackageResources.InitPackageResourcesParam resParam) {
-        if (resParam.packageName.equals("com.soft.blued")) {
-            String modulePath = AppContainer.getInstance().getModulePath();
-            XModuleResources moduleRes = XModuleResources.createInstance(modulePath, resParam.res);
-            AppContainer.getInstance().setModuleRes(moduleRes);
-            resParam.res.hookLayout("com.soft.blued", "layout", "fragment_settings", new XC_LayoutInflated() {
-                @SuppressLint({"ResourceType", "SetTextI18n"})
-                @Override
-                public void handleLayoutInflated(LayoutInflatedParam liParam) {
-                    LayoutInflater inflater = (LayoutInflater) liParam.view.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    Context bluedContext = AppContainer.getInstance().getBluedContext();
-                    int scrollView1ID = bluedContext.getResources().getIdentifier("scrollView1", "id", bluedContext.getPackageName());
-                    ScrollView scrollView = liParam.view.findViewById(scrollView1ID);
-                    LinearLayout scrollLinearLayout = (LinearLayout) scrollView.getChildAt(0);
-
-                    // 保留设置界面布局
-                    LinearLayout mySettingsLayoutAu = (LinearLayout) inflater.inflate(moduleRes.getLayout(R.layout.module_settings_layout), null, false);
-                    TextView auCopyTitleTv = mySettingsLayoutAu.findViewById(R.id.settings_name);
-                    auCopyTitleTv.setText("复制授权信息(请勿随意泄漏)");
-                    mySettingsLayoutAu.setOnClickListener(v -> AuthManager.auHook(true, AppContainer.getInstance().getClassLoader(), bluedContext));
-
-                    LinearLayout moduleSettingsLayout = (LinearLayout) inflater.inflate(moduleRes.getLayout(R.layout.module_settings_layout), null, false);
-                    TextView moduleSettingsTitleTv = moduleSettingsLayout.findViewById(R.id.settings_name);
-                    moduleSettingsTitleTv.setText("外挂模块设置");
-                    moduleSettingsLayout.setOnClickListener(view -> {
-                        AlertDialog dialog = getAlertDialog(liParam);
-                        Objects.requireNonNull(dialog.getWindow()).setGravity(Gravity.CENTER);
-                        dialog.getWindow().setLayout(100, 300);
-                        dialog.setOnShowListener(dialogInterface -> {
-                            View parentView = dialog.getWindow().getDecorView();
-                            parentView.setBackgroundColor(Color.parseColor("#F7F6F7"));
-                        });
-                        dialog.show();
-                    });
-
-                    scrollLinearLayout.addView(mySettingsLayoutAu, 0);
-                    scrollLinearLayout.addView(moduleSettingsLayout, 1);
-                }
-
-                private AlertDialog getAlertDialog(LayoutInflatedParam liParam) {
-                    // 保留设置界面创建逻辑
-                    SettingsViewCreator creator = new SettingsViewCreator(liParam.view.getContext());
-                    View settingsView = creator.createSettingsView();
-                    creator.setOnSwitchCheckedChangeListener((functionId, isChecked) -> {
-                        // 空实现（原逻辑）
-                    });
-                    AlertDialog.Builder builder = new AlertDialog.Builder(liParam.view.getContext());
-                    builder.setView(settingsView);
-                    return builder.create();
-                }
-            });
-        }
+   @Override
+public void handleInitPackageResources(XC_InitPackageResources.InitPackageResourcesParam resParam) {
+    if (resParam.packageName.equals("com.soft.blued")) {
+        String modulePath = AppContainer.getInstance().getModulePath();
+        XModuleResources moduleRes = XModuleResources.createInstance(modulePath, resParam.res);
+        AppContainer.getInstance().setModuleRes(moduleRes);
+        resParam.res.hookLayout("com.soft.blued", "layout", "fragment_settings", new XC_LayoutInflated() {
+            @SuppressLint({"ResourceType", "SetTextI18n"})
+            @Override
+            public void handleLayoutInflated(LayoutInflatedParam liParam) {
+                // 已删除插入自定义设置项的代码
+            }
+        });
     }
+}
 
     @Override
     public void initZygote(StartupParam startupParam) {
