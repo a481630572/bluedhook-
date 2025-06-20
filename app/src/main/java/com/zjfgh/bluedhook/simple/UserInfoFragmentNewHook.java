@@ -170,11 +170,13 @@ public class UserInfoFragmentNewHook {
                     @Override
                     protected void beforeHookedMethod(MethodHookParam param) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
                         SettingItem settingItem = SQLiteManagement.getInstance().getSettingByFunctionId(SettingsViewCreator.ANCHOR_MONITOR_LIVE_HOOK);
-                        if (settingItem.isSwitchOn()) {
-                            View currentView = (View) XposedHelpers.getObjectField(param.thisObject, "U");
-                            if (currentView != lastView) {
-                                lastView = currentView;
-                                return;
+    if (Optional.ofNullable(settingItem)
+            .map(SettingItem::isSwitchOn)
+            .orElse(false)) {
+        View currentView = (View) XposedHelpers.getObjectField(param.thisObject, "U");
+        if (currentView != lastView) {
+            lastView = currentView;
+            return;
                             }
                             Object userInfoEntity = param.args[0];
                             String uid = (String) XposedHelpers.getObjectField(userInfoEntity, "uid");
