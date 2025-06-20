@@ -75,11 +75,7 @@ public class SettingsViewCreator {
             functionName.setText(setting.getFunctionName());
             description.setText(setting.getDescription());
             switchButton.setChecked(setting.isSwitchOn());
-            if (setting.getFunctionId() == WS_SERVER) {
-                if (BluedHook.wsServerManager != null) {
-                    switchButton.setChecked(BluedHook.wsServerManager.isServerRunning());
-                }
-            }
+            // 删除wsServerManager相关
             if (setting.getExtraDataHint().isEmpty()) {
                 extraData.setVisibility(View.GONE);
             } else {
@@ -96,15 +92,7 @@ public class SettingsViewCreator {
                     extraData.setVisibility(isChecked ? View.VISIBLE : View.GONE);
                 if (switchListener != null)
                     switchListener.onSwitchChanged(setting.getFunctionId(), isChecked);
-                if (setting.getFunctionId() == WS_SERVER) {
-                    if (BluedHook.wsServerManager != null) {
-                        if (isChecked) {
-                            BluedHook.wsServerManager.startServer(Integer.parseInt(setting.getExtraData()));
-                        } else {
-                            BluedHook.wsServerManager.stopServer();
-                        }
-                    }
-                }
+                // 删除wsServerManager相关
             });
             extraData.addTextChangedListener(new TextWatcher() {
                 @Override
