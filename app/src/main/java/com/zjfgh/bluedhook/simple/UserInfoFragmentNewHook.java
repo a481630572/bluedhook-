@@ -275,6 +275,7 @@ class UserInfoFragmentNewExtraLayout {
         tvUserRegTime.setId(View.generateViewId());
 
         userLocateBt = new Button(context);
+        userLocateBt.setBackgroundColor(Color.TRANSPARENT); // 这句让Button没有背景板
         userLocateBt.setTextSize(16f);
         userLocateBt.setTypeface(userLocateBt.getTypeface(), android.graphics.Typeface.BOLD);
         userLocateBt.setTextColor(Color.parseColor("#FF00FFA3"));
