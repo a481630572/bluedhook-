@@ -39,34 +39,31 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                     AppContainer.getInstance().setBluedContext(bluedContext);
                     AppContainer.getInstance().setClassLoader(bluedContext.getClassLoader());
                     Toast.makeText(bluedContext, "外挂成功！", Toast.LENGTH_LONG).show();
-                    
+
+                    // 模块加载时确保设置项已初始化
+                    new SettingsViewCreator(bluedContext);
+
                     // 初始化个人主页Hook（原逻辑）
                     UserInfoFragmentNewHook.getInstance(bluedContext, AppContainer.getInstance().getModuleRes());
-                    
-                    // **修正：自动初始化主播开播提醒Hook（ID=1）**
+
+                    // 自动初始化主播开播提醒Hook
                     initializeAnchorMonitorHook(bluedContext);
                 }
             });
         }
     }
-    
+
     /**
      * 初始化主播开播提醒Hook（ID=1）
      */
     private void initializeAnchorMonitorHook(Context context) {
         try {
-            // 获取数据库管理实例
             SQLiteManagement dbManager = SQLiteManagement.getInstance();
-            // 根据ID查询设置项（ANCHOR_MONITOR_LIVE_HOOK=1）
+            // 读取设置项（此时已保证初始化）
             SettingItem setting = dbManager.getSettingByFunctionId(SettingsViewCreator.ANCHOR_MONITOR_LIVE_HOOK);
-            
-            // 若设置为开启（默认已开启），则触发Hook
             if (setting != null && setting.isSwitchOn()) {
                 Log.d("BluedHook", "自动加载主播开播提醒Hook（ID=1）");
-                
-                // 假设主播监听Hook的实现类为AnchorMonitorHook，需根据实际项目修改
-                // 示例：调用startMonitor()方法启动监听逻辑
-                
+                AnchorMonitorHook.getInstance().startMonitor();
             }
         } catch (Exception e) {
             Log.e("BluedHook", "初始化主播开播提醒Hook失败", e);
@@ -88,13 +85,13 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                     int scrollView1ID = bluedContext.getResources().getIdentifier("scrollView1", "id", bluedContext.getPackageName());
                     ScrollView scrollView = liParam.view.findViewById(scrollView1ID);
                     LinearLayout scrollLinearLayout = (LinearLayout) scrollView.getChildAt(0);
-                    
+
                     // 保留设置界面布局
                     LinearLayout mySettingsLayoutAu = (LinearLayout) inflater.inflate(moduleRes.getLayout(R.layout.module_settings_layout), null, false);
                     TextView auCopyTitleTv = mySettingsLayoutAu.findViewById(R.id.settings_name);
                     auCopyTitleTv.setText("复制授权信息(请勿随意泄漏)");
                     mySettingsLayoutAu.setOnClickListener(v -> AuthManager.auHook(true, AppContainer.getInstance().getClassLoader(), bluedContext));
-                    
+
                     LinearLayout moduleSettingsLayout = (LinearLayout) inflater.inflate(moduleRes.getLayout(R.layout.module_settings_layout), null, false);
                     TextView moduleSettingsTitleTv = moduleSettingsLayout.findViewById(R.id.settings_name);
                     moduleSettingsTitleTv.setText("外挂模块设置");
@@ -108,7 +105,7 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                         });
                         dialog.show();
                     });
-                    
+
                     scrollLinearLayout.addView(mySettingsLayoutAu, 0);
                     scrollLinearLayout.addView(moduleSettingsLayout, 1);
                 }
