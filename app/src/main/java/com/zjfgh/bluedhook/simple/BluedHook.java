@@ -14,8 +14,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONObject;
-
 import java.util.Objects;
 
 import de.robv.android.xposed.IXposedHookInitPackageResources;
@@ -25,7 +23,6 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_InitPackageResources;
 import de.robv.android.xposed.callbacks.XC_LayoutInflated;
-import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackageResources, IXposedHookZygoteInit {
     @Override
@@ -40,7 +37,7 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                     AppContainer.getInstance().setClassLoader(bluedContext.getClassLoader());
                     Toast.makeText(bluedContext, "外挂成功！", Toast.LENGTH_LONG).show();
                     
-                    // 仅保留UserInfoFragmentNewHook
+                    // 仅保留个人主页信息扩展功能
                     UserInfoFragmentNewHook.getInstance(bluedContext, AppContainer.getInstance().getModuleRes());
                 }
             });
@@ -63,7 +60,7 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                     ScrollView scrollView = liParam.view.findViewById(scrollView1ID);
                     LinearLayout scrollLinearLayout = (LinearLayout) scrollView.getChildAt(0);
                     
-                    // 保留设置界面布局
+                    // 保留设置界面布局（移除WebSocket相关选项）
                     LinearLayout mySettingsLayoutAu = (LinearLayout) inflater.inflate(moduleRes.getLayout(R.layout.module_settings_layout), null, false);
                     TextView auCopyTitleTv = mySettingsLayoutAu.findViewById(R.id.settings_name);
                     auCopyTitleTv.setText("复制授权信息(请勿随意泄漏)");
@@ -75,7 +72,7 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                     moduleSettingsLayout.setOnClickListener(view -> {
                         AlertDialog dialog = getAlertDialog(liParam);
                         Objects.requireNonNull(dialog.getWindow()).setGravity(Gravity.CENTER);
-                        dialog.getWindow().setLayout(100, 300);
+                        dialog.getWindow().setLayout(100, 300); // 建议调整为合理尺寸（如MATCH_PARENT）
                         dialog.setOnShowListener(dialogInterface -> {
                             View parentView = dialog.getWindow().getDecorView();
                             parentView.setBackgroundColor(Color.parseColor("#F7F6F7"));
@@ -88,11 +85,11 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                 }
 
                 private AlertDialog getAlertDialog(LayoutInflatedParam liParam) {
-                    // 移除WebSocket相关逻辑，保留设置界面创建
+                    // 创建设置界面（已移除WebSocket相关逻辑）
                     SettingsViewCreator creator = new SettingsViewCreator(liParam.view.getContext());
                     View settingsView = creator.createSettingsView();
                     creator.setOnSwitchCheckedChangeListener((functionId, isChecked) -> {
-                        // 空实现，避免依赖已删除的功能
+                        // 空实现，仅保留必要回调
                     });
                     AlertDialog.Builder builder = new AlertDialog.Builder(liParam.view.getContext());
                     builder.setView(settingsView);
