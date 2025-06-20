@@ -19,7 +19,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -81,8 +80,6 @@ public class UserInfoFragmentNewHook {
         this.classLoader = context.getClassLoader();
         this.modRes = modRes;
         hookAnchorMonitorAddButton();
-        hookPhotoProtection();
-        hookRemoveWatermark();
     }
 
     private ImageButton ibvClean;
@@ -94,76 +91,12 @@ public class UserInfoFragmentNewHook {
         XposedHelpers.findAndHookMethod(TARGET_CLASS, classLoader, TARGET_METHOD,
                 XposedHelpers.findClass(USER_INFO_ENTITY_CLASS, classLoader), new XC_MethodHook() {
                     private View lastView = null;
-                    private final GradientDrawable defaultBackground = createGradientDrawable(COLOR_PRIMARY);
-                    private final GradientDrawable activeBackground = createGradientDrawable(COLOR_SECONDARY);
-                    TagLayout tlTitle;
                     String relationship;
 
                     @SuppressLint("UseCompatLoadingForDrawables")
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                         super.afterHookedMethod(param);
-                        Object userInfoEntity = param.args[0];
-                        String uid = (String) XposedHelpers.getObjectField(userInfoEntity, "uid");
-                        FrameLayout flFeedFragmentContainer = (FrameLayout) XposedHelpers.getObjectField(param.thisObject, "b");
-                        @SuppressLint("DiscouragedApi") int flow_my_vip_tagsId = getSafeContext().getResources().getIdentifier("flow_my_vip_tags", "id", getSafeContext().getPackageName());
-                        ViewGroup flow_my_vip_tags = flFeedFragmentContainer.findViewById(flow_my_vip_tagsId);
-                        flow_my_vip_tags.setVisibility(View.VISIBLE);
-                        tlTitle = new TagLayout(flFeedFragmentContainer.getContext());
-                        tlTitle.setFirstMarginStartSize(0);
-                        NetworkManager.getInstance().getAsync(NetworkManager.getBluedPicSaveStatusApi(uid), AuthManager.auHook(false, classLoader, getSafeContext()), new Callback() {
-                            @Override
-                            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
-                            }
-
-                            @SuppressLint("UseCompatLoadingForDrawables")
-                            @Override
-                            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                                try {
-                                    // 假设jsonString是你的JSON字符串
-                                    JSONObject response1 = new JSONObject(response.body().string());
-                                    // 解析code和message
-                                    int code = response1.getInt("code");
-                                    String message = response1.getString("message");
-                                    // 解析data数组
-                                    JSONArray dataArray = response1.getJSONArray("data");
-                                    if (dataArray.length() > 0) {
-                                        JSONObject dataObj = dataArray.getJSONObject(0);
-                                        int albumBanSave = dataObj.getInt("album_ban_save");
-                                        int feedPicBanSave = dataObj.getInt("feed_pic_ban_save");
-                                        if (albumBanSave > 0 || feedPicBanSave > 0) {
-                                            tlTitle.post(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    tlTitle.addTextView("相册保护已解除", 9, modRes.getDrawable(R.drawable.bg_gradient_orange, null));
-                                                }
-                                            });
-                                        }
-                                    }
-                                } catch (JSONException e) {
-                                    Log.e("BluedHook：", e.getMessage());
-                                }
-                            }
-                        });
-                        int privacyPhotosHasLocked = XposedHelpers.getIntField(userInfoEntity, "privacy_photos_has_locked");
-                        if (privacyPhotosHasLocked == 0) {
-                            XposedHelpers.setIntField(userInfoEntity, "privacy_photos_has_locked", 1);
-                            tlTitle.addTextView("隐私相册已解除", 9, modRes.getDrawable(R.drawable.bg_green_rounded, null));
-                        }
-                        tlTitle.addTextView("保存图片去水印", 9, modRes.getDrawable(R.drawable.bg_rounded, null));
-                        flow_my_vip_tags.addView(tlTitle);
-                        //拉黑检测
-                        relationship = (String) XposedHelpers.getObjectField(userInfoEntity, "relationship");
-                        if (relationship != null && relationship.equals("8")) {
-                            XposedHelpers.setObjectField(userInfoEntity, "relationship", "0");
-                            Object userInfoFragmentNew = param.thisObject;
-                            View ll_in_blackView = (View) XposedHelpers.getObjectField(userInfoFragmentNew, "Y");
-                            TextView tv_be_blockedView = (TextView) XposedHelpers.getObjectField(userInfoFragmentNew, "M");
-                            ll_in_blackView.setVisibility(View.VISIBLE);
-                            tv_be_blockedView.setVisibility(View.VISIBLE);
-                            tv_be_blockedView.setText("此用户已将你拉黑");
-                        }
                     }
 
                     @SuppressLint({"UseCompatLoadingForDrawables", "SetTextI18n"})
@@ -253,14 +186,6 @@ public class UserInfoFragmentNewHook {
                                 TextView tvLocation = userInfoExtraAMap.findViewById(R.id.tv_location);
                                 String location = (String) XposedHelpers.getObjectField(userInfoEntity, "location");
                                 tvLocation.setText("真实位置(距离)：" + location);
-//                                        "请在地图上点击任意两个位置\n" +
-//                                        "(尽量选择与真实位置接近的地点)\n" +
-//                                        "随后你将看到两个蓝色的圆\n" +
-//                                        "点击两个圆的交叉点，并查看虚拟距离\n" +
-//                                        "根据虚拟距离继续缩小范围\n" +
-//                                        "直到虚拟位置为0\n" +
-//                                        "即可定位到此用户\n" +
-//                                        "如果圆太多可点击右上角垃圾桶清除所有覆盖物"
                                 TextView tvUserWithSelfDistance = userInfoExtraAMap.findViewById(R.id.tv_user_with_self_distance);
                                 tvUserWithSelfDistance.setVisibility(View.GONE);
                                 aMapHelper.onCreate(null);
@@ -450,13 +375,6 @@ public class UserInfoFragmentNewHook {
                                     aMapHelper.onDestroy();
                                 });
                             });
-                            @SuppressLint("DiscouragedApi") int fl_buttonsID = getSafeContext().getResources().getIdentifier("fl_buttons", "id", getSafeContext().getPackageName());
-                            FrameLayout flButtons = flFeedFragmentContainer.findViewById(fl_buttonsID);
-                            LinearLayout followView = (LinearLayout) flButtons.getChildAt(1);
-                            TextView specialFollowButton = createSpecialFollowButton(currentView.getContext());
-                            updateButtonState(specialFollowButton, dbManager.getUserByUid(uid) != null);
-                            setupButtonClickListener(specialFollowButton, userInfoEntity);
-                            followView.addView(specialFollowButton, 0);
                             if (isHideLastOperate == 1 && isAnchor == 1) {
                                 @SuppressLint("DiscouragedApi") ViewGroup rlBasicInfoRoot = flFeedFragmentContainer.findViewById(getSafeContext().getResources().getIdentifier("rl_basic_info_root", "id", getSafeContext().getPackageName()));
                                 HorizontalScrollView horizontalScrollView = (HorizontalScrollView) rlBasicInfoRoot.getChildAt(0);
@@ -516,217 +434,40 @@ public class UserInfoFragmentNewHook {
 
                     }
 
-                    private TextView createSpecialFollowButton(Context context) {
-                        TextView button = new TextView(context);
+                    private void startRefreshAnimation() {
+                        // 启动旋转动画
+                        rotateAnim.start();
 
-                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                                ViewGroup.LayoutParams.WRAP_CONTENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT
-                        );
-                        params.setMargins(
-                                ModuleTools.dpToPx(MARGIN_HORIZONTAL),
-                                0,
-                                ModuleTools.dpToPx(MARGIN_HORIZONTAL),
-                                0
-                        );
-
-                        button.setLayoutParams(params);
-                        button.setTextColor(Color.WHITE);
-                        button.setPadding(
-                                ModuleTools.dpToPx(PADDING_HORIZONTAL),
-                                ModuleTools.dpToPx(PADDING_VERTICAL),
-                                ModuleTools.dpToPx(PADDING_HORIZONTAL),
-                                ModuleTools.dpToPx(PADDING_VERTICAL)
-                        );
-                        button.setBackground(defaultBackground);
-
-                        return button;
+                        // 按钮缩小效果
+                        ibvClean.animate()
+                                .scaleX(0.9f)
+                                .scaleY(0.9f)
+                                .setDuration(200)
+                                .start();
                     }
 
-                    private void updateButtonState(TextView button, boolean isFollowing) {
-                        button.setTag(isFollowing);
-                        button.setText(isFollowing ? "取消特关" : "特别关注");
-                        button.setBackground(isFollowing ? activeBackground : defaultBackground);
-                    }
+                    @SuppressLint("UseCompatLoadingForDrawables")
+                    private void stopRefreshAnimation() {
+                        // 停止旋转并恢复原位
+                        rotateAnim.cancel();
+                        ibvClean.setRotation(0f);
 
-                    private void setupButtonClickListener(TextView button, Object userInfoEntity) {
-                        button.setOnClickListener(v -> {
-                            boolean isSpFollow = (boolean) v.getTag();
-                            String uid = (String) XposedHelpers.getObjectField(userInfoEntity, "uid");
-                            String unionUid = (String) XposedHelpers.getObjectField(userInfoEntity, "bluedIdentifyId");
-                            String name = (String) XposedHelpers.getObjectField(userInfoEntity, "name");
-                            String live = (String) XposedHelpers.getObjectField(userInfoEntity, "live");
-                            String avatar = (String) XposedHelpers.getObjectField(userInfoEntity, "avatar");
-                            final String[] enc_uid = {"获取失败"};
-                            Map<String, String> authMap = AuthManager.auHook(false, AppContainer.getInstance().getClassLoader(), AppContainer.getInstance().getBluedContext());
-                            if (isSpFollow) {
-                                UserPopupWindow.getInstance().delAnchor(uid, name);
-                            } else {
-                                NetworkManager.getInstance().getAsync(NetworkManager.getBluedLiveUserCard(uid), authMap, new Callback() {
-                                    @Override
-                                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                                        ModuleTools.showBluedToast("获取加密UID失败(onFailure)");
-                                    }
+                        // 恢复按钮大小
+                        ibvClean.animate()
+                                .scaleX(1f)
+                                .scaleY(1f)
+                                .setDuration(200)
+                                .start();
 
-                                    @Override
-                                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                                        UserCardResponse userCardResponse = JSON.parseObject(response.body().string(), UserCardResponse.class);
-                                        if (userCardResponse.getCode() == 200) {
-                                            String link = userCardResponse.getData().get(0).getContract().getLink();
-                                            enc_uid[0] = ModuleTools.getParamFromUrl(link, "uid");
-                                        } else {
-                                            ModuleTools.showBluedToast("添加加密UID失败(" + userCardResponse.getCode() + ")");
-                                            Log.i("BluedHook", "响应内容：" + response.body().string());
-                                        }
-                                        User user = new User();
-                                        user.setUid(uid);
-                                        user.setUnion_uid(unionUid);
-                                        user.setName(name);
-                                        user.setLive(live);
-                                        user.setAvatar(avatar);
-                                        user.setEnc_uid(enc_uid[0]);
-                                        UserPopupWindow.getInstance().addAnchor(user);
-                                    }
-                                });
+                        // 添加完成效果（可选）
+                        ibvClean.setImageDrawable(modRes.getDrawable(R.drawable.ic_done, null));
+                        handler.postDelayed(new Runnable() {
+                            @SuppressLint("UseCompatLoadingForDrawables")
+                            @Override
+                            public void run() {
+                                ibvClean.setImageDrawable(modRes.getDrawable(R.drawable.ic_refresh, null));
                             }
-
-                            updateButtonState(button, !isSpFollow);
-                        });
-                    }
-
-                    private GradientDrawable createGradientDrawable(String color) {
-                        return new Gradient()
-                                .setRadius(CORNER_RADIUS)
-                                .setColorLeft(color)
-                                .setColorRight(color)
-                                .build();
-                    }
-                });
-    }
-
-    private void startRefreshAnimation() {
-        // 启动旋转动画
-        rotateAnim.start();
-
-        // 按钮缩小效果
-        ibvClean.animate()
-                .scaleX(0.9f)
-                .scaleY(0.9f)
-                .setDuration(200)
-                .start();
-    }
-
-    @SuppressLint("UseCompatLoadingForDrawables")
-    private void stopRefreshAnimation() {
-        // 停止旋转并恢复原位
-        rotateAnim.cancel();
-        ibvClean.setRotation(0f);
-
-        // 恢复按钮大小
-        ibvClean.animate()
-                .scaleX(1f)
-                .scaleY(1f)
-                .setDuration(200)
-                .start();
-
-        // 添加完成效果（可选）
-        ibvClean.setImageDrawable(modRes.getDrawable(R.drawable.ic_done, null));
-        handler.postDelayed(new Runnable() {
-            @SuppressLint("UseCompatLoadingForDrawables")
-            @Override
-            public void run() {
-                ibvClean.setImageDrawable(modRes.getDrawable(R.drawable.ic_refresh, null));
-            }
-        }, 1000);
-    }
-
-    private void hookPhotoProtection() {
-        this.hookPhotoProtection(classLoader,
-                "com.soft.blued.ui.photo.fragment.ShowAlbumFragment",
-                "已解除动态相册保护功能，可直接下载");
-        this.hookPhotoProtection(classLoader,
-                "com.soft.blued.ui.photo.fragment.ShowPhotoFragment",
-                "已解除相册保护功能，可直接下载");
-    }
-
-    // 定义通用的Hook逻辑
-    private void hookPhotoProtection(ClassLoader classLoader, String className, String toastMessage) {
-        XposedHelpers.findAndHookMethod(
-                className,
-                classLoader,
-                "a",
-                Object[].class,
-                String.class,
-                String.class,
-                new XC_MethodHook() {
-                    @Override
-                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                        String albumBanSave = (String) param.args[1];
-                        String feedPicBanSave = (String) param.args[2];
-                        boolean hasHook = false;
-                        if ("1".equals(albumBanSave)) {
-                            param.args[1] = "0";
-                            hasHook = true;
-                        }
-                        if ("1".equals(feedPicBanSave)) {
-                            param.args[2] = "0";
-                            hasHook = true;
-                        }
-                        if (hasHook) {
-                            ModuleTools.showBluedToast(toastMessage);
-                        }
-                    }
-                });
-    }
-
-    public void hookRemoveWatermark() {
-        Class<?> UserInfoEntity = XposedHelpers.findClass("com.soft.blued.ui.user.model.UserInfoEntity", classLoader);
-        XposedHelpers.findAndHookMethod("com.soft.blued.ui.user.fragment.UserInfoFragmentNew", classLoader, "j", UserInfoEntity, new XC_MethodHook() {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                super.beforeHookedMethod(param);
-            }
-
-            @SuppressLint("UseCompatLoadingForDrawables")
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                super.afterHookedMethod(param);
-
-            }
-        });
-        XposedHelpers.findAndHookMethod("com.soft.blued.ui.user.fragment.UserInfoFragmentNew", classLoader, "o", new XC_MethodHook() {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                super.beforeHookedMethod(param);
-            }
-
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                super.afterHookedMethod(param);
-            }
-        });
-        XposedHelpers.findAndHookMethod(
-                "com.soft.blued.ui.photo.fragment.BasePhotoFragment",
-                classLoader,
-                "a",
-                File.class,
-                String.class,
-                new XC_MethodHook() {
-                    @Override
-                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                        File file = (File) param.args[0];
-                        Log.i("BluedHook", "paramparam" + param.args[0]);
-                        // 如果是图片文件(非GIF)
-                        if (!ChatHelperV4.a(file)) {
-                            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-                            if (bitmap != null) {
-                                Class<?> ImageUtils = XposedHelpers.findClass("com.blued.android.framework.utils.ImageUtils", classLoader);
-                                // 直接保存原图，跳过水印步骤
-                                XposedHelpers.callStaticMethod(ImageUtils, "a", bitmap);
-                                // 终止原方法执行
-                                param.setResult(null);
-                            }
-                        }
+                        }, 1000);
                     }
                 });
     }
