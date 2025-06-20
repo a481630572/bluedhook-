@@ -64,6 +64,7 @@ public class UserInfoFragmentNewHook {
     private static final int MARGIN_HORIZONTAL = 30;
     private static final double initialLat = 39.909088605597;
     private static final double initialLng = 116.39745423747772;
+    private static final String MODULE_PACKAGE_NAME = "com.zjfgh.bluedhook.simple";
     private static UserInfoFragmentNewHook instance;
     private final WeakReference<Context> contextRef;
     private final ClassLoader classLoader;
@@ -104,13 +105,13 @@ public class UserInfoFragmentNewHook {
                     @Override
                     protected void beforeHookedMethod(MethodHookParam param) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
                         SettingItem settingItem = SQLiteManagement.getInstance().getSettingByFunctionId(SettingsViewCreator.ANCHOR_MONITOR_LIVE_HOOK);
-    if (Optional.ofNullable(settingItem)
-            .map(SettingItem::isSwitchOn)
-            .orElse(false)) {
-        View currentView = (View) XposedHelpers.getObjectField(param.thisObject, "U");
-        if (currentView != lastView) {
-            lastView = currentView;
-            return;
+                        if (Optional.ofNullable(settingItem)
+                                .map(SettingItem::isSwitchOn)
+                                .orElse(false)) {
+                            View currentView = (View) XposedHelpers.getObjectField(param.thisObject, "U");
+                            if (currentView != lastView) {
+                                lastView = currentView;
+                                return;
                             }
                             Object userInfoEntity = param.args[0];
                             String uid = (String) XposedHelpers.getObjectField(userInfoEntity, "uid");
@@ -122,7 +123,14 @@ public class UserInfoFragmentNewHook {
                             @SuppressLint("DiscouragedApi") int fl_contentID = getSafeContext().getResources().getIdentifier("fl_content", "id", getSafeContext().getPackageName());
                             LinearLayout fl_content = flFeedFragmentContainer.findViewById(fl_contentID);
                             LayoutInflater inflater = (LayoutInflater) fl_content.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                            LinearLayout userInfoFragmentNewExtra = (LinearLayout) inflater.inflate(modRes.getLayout(R.layout.user_info_fragment_new_extra), null);
+
+                            // 修复点1：动态获取你模块的 layout 资源ID
+                            int layoutId = modRes.getIdentifier("user_info_fragment_new_extra", "layout", MODULE_PACKAGE_NAME);
+                            if (layoutId == 0) {
+                                throw new android.content.res.Resources.NotFoundException("找不到 user_info_fragment_new_extra 资源");
+                            }
+                            LinearLayout userInfoFragmentNewExtra = (LinearLayout) inflater.inflate(modRes.getLayout(layoutId), null);
+
                             @SuppressLint("DiscouragedApi") int v_userinfo_card_bgID = getSafeContext().getResources().getIdentifier("v_userinfo_card_bg", "id", getSafeContext().getPackageName());
                             View v_userinfo_card_bg = flFeedFragmentContainer.findViewById(v_userinfo_card_bgID);
                             ViewGroup viewGroup = (ViewGroup) v_userinfo_card_bg.getParent();
@@ -142,20 +150,31 @@ public class UserInfoFragmentNewHook {
                             if (isHideLastDistance == 1) {
                                 userInfoExtraLocate.setVisibility(View.GONE);
                             }
-                            userInfoExtraLocate.setBackground(modRes.getDrawable(R.drawable.bg_tech_tag, null));
+                            // 修复点2：动态获取 drawable 资源ID
+                            int bgTechTagId = modRes.getIdentifier("bg_tech_tag", "drawable", MODULE_PACKAGE_NAME);
+                            userInfoExtraLocate.setBackground(modRes.getDrawable(bgTechTagId, null));
                             userInfoExtraLocate.setOnClickListener(v -> {
-                                LinearLayout userInfoExtraAMap = (LinearLayout) inflater.inflate(modRes.getLayout(R.layout.user_info_extra_amap), null);
+                                int amapLayoutId = modRes.getIdentifier("user_info_extra_amap", "layout", MODULE_PACKAGE_NAME);
+                                if (amapLayoutId == 0) {
+                                    throw new android.content.res.Resources.NotFoundException("找不到 user_info_extra_amap 资源");
+                                }
+                                LinearLayout userInfoExtraAMap = (LinearLayout) inflater.inflate(modRes.getLayout(amapLayoutId), null);
                                 LinearLayout llAMap = userInfoExtraAMap.findViewById(R.id.ll_aMap);
                                 LinearLayout llLocationData = userInfoExtraAMap.findViewById(R.id.ll_location_data);
                                 ImageView ivGpsIcon = userInfoExtraAMap.findViewById(R.id.iv_gps_icon);
-                                ivGpsIcon.setImageDrawable(modRes.getDrawable(R.drawable.gps_location_icon1, null));
-                                llLocationData.setBackground(modRes.getDrawable(R.drawable.bg_tech_tag, null));
+                                int gpsIconId = modRes.getIdentifier("gps_location_icon1", "drawable", MODULE_PACKAGE_NAME);
+                                ivGpsIcon.setImageDrawable(modRes.getDrawable(gpsIconId, null));
+                                int bgTechTagId2 = modRes.getIdentifier("bg_tech_tag", "drawable", MODULE_PACKAGE_NAME);
+                                llLocationData.setBackground(modRes.getDrawable(bgTechTagId2, null));
                                 LinearLayout llLocationRoot = userInfoExtraAMap.findViewById(R.id.ll_location_root);
-                                llLocationRoot.setBackground(modRes.getDrawable(R.drawable.bg_tech_item_inner, null));
+                                int bgTechInnerId = modRes.getIdentifier("bg_tech_item_inner", "drawable", MODULE_PACKAGE_NAME);
+                                llLocationRoot.setBackground(modRes.getDrawable(bgTechInnerId, null));
                                 AMapHookHelper aMapHelper = new AMapHookHelper(fl_content.getContext(), fl_content.getContext().getClassLoader());
                                 ibvClean = userInfoExtraAMap.findViewById(R.id.iv_clean_icon);
-                                ibvClean.setBackground(modRes.getDrawable(R.drawable.tech_button_bg, null));
-                                ibvClean.setImageDrawable(modRes.getDrawable(R.drawable.ic_refresh, null));
+                                int techBtnBgId = modRes.getIdentifier("tech_button_bg", "drawable", MODULE_PACKAGE_NAME);
+                                ibvClean.setBackground(modRes.getDrawable(techBtnBgId, null));
+                                int icRefreshId = modRes.getIdentifier("ic_refresh", "drawable", MODULE_PACKAGE_NAME);
+                                ibvClean.setImageDrawable(modRes.getDrawable(icRefreshId, null));
                                 // 设置旋转动画
                                 rotateAnim = ObjectAnimator.ofFloat(ibvClean, "rotation", 0f, 360f);
                                 rotateAnim.setDuration(800);
@@ -181,7 +200,8 @@ public class UserInfoFragmentNewHook {
                                 TextView tv_username = userInfoExtraAMap.findViewById(R.id.tv_username);
                                 tv_username.setText(name);
                                 TextView tvAutoLocation = userInfoExtraAMap.findViewById(R.id.tv_auto_location);
-                                tvAutoLocation.setBackground(modRes.getDrawable(R.drawable.bg_auto_location_button, null));
+                                int bgAutoLocId = modRes.getIdentifier("bg_auto_location_button", "drawable", MODULE_PACKAGE_NAME);
+                                tvAutoLocation.setBackground(modRes.getDrawable(bgAutoLocId, null));
                                 TextView tvLongitude = userInfoExtraAMap.findViewById(R.id.tv_longitude);
                                 TextView tvLatitude = userInfoExtraAMap.findViewById(R.id.tv_latitude);
                                 TextView tvLocation = userInfoExtraAMap.findViewById(R.id.tv_location);
@@ -204,17 +224,13 @@ public class UserInfoFragmentNewHook {
                                         NetworkManager.getInstance().getAsync(NetworkManager.getBluedSetUsersLocationApi(initialLat, initialLng), AuthManager.auHook(false, classLoader, fl_content.getContext()), new Callback() {
                                             @Override
                                             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
                                             }
-
                                             @Override
                                             public void onResponse(@NonNull Call call, @NonNull Response response) {
                                                 NetworkManager.getInstance().getAsync(NetworkManager.getBluedUserBasicAPI(uid), AuthManager.auHook(false, classLoader, fl_content.getContext()), new Callback() {
                                                     @Override
                                                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
                                                     }
-
                                                     @Override
                                                     public void onResponse(@NonNull Call call, @NonNull Response response) {
                                                         try {
@@ -235,70 +251,36 @@ public class UserInfoFragmentNewHook {
                                                                             tvUserWithSelfDistance.setVisibility(View.VISIBLE);
                                                                         });
                                                                         LocationTracker tracker = new LocationTracker(aMapHelper, uid, classLoader, fl_content);
-                                                                        // 开始追踪并设置回调
                                                                         tracker.startTracking(initialLat, initialLng, distanceKm, 15, new LocationTracker.LocationTrackingCallback() {
-                                                                            @Override
-                                                                            public void onInitialLocation(double lat, double lng, double distanceKm) {
-                                                                                Log.d("LocationTracker", String.format("初始位置: %.6f, %.6f, 距离: %.3fkm", lat, lng, distanceKm));
-                                                                            }
-
-                                                                            @Override
-                                                                            public void onProbeLocation(double lat, double lng) {
-                                                                                Log.d("LocationTracker", String.format("探测点位置: %.6f, %.6f", lat, lng));
-                                                                            }
-
-                                                                            @Override
-                                                                            public void onProbeDistance(double distanceKm) {
-                                                                                Log.d("LocationTracker", String.format("探测点距离: %.3fkm", distanceKm));
-                                                                            }
-
-                                                                            @Override
-                                                                            public void onIntersectionLocation(double lat, double lng) {
-                                                                                Log.d("LocationTracker", String.format("交点位置: %.6f, %.6f", lat, lng));
-                                                                            }
-
-                                                                            @Override
-                                                                            public void onIntersectionDistance(double lat, double lng, double distanceKm) {
-                                                                                Log.d("LocationTracker", String.format("交点距离: %.6f, %.6f, 距离: %.3fkm", lat, lng, distanceKm));
-                                                                            }
-
+                                                                            @Override public void onInitialLocation(double lat, double lng, double distanceKm) {}
+                                                                            @Override public void onProbeLocation(double lat, double lng) {}
+                                                                            @Override public void onProbeDistance(double distanceKm) {}
+                                                                            @Override public void onIntersectionLocation(double lat, double lng) {}
+                                                                            @Override public void onIntersectionDistance(double lat, double lng, double distanceKm) {}
                                                                             @Override
                                                                             public void onNewCenterLocation(double lat, double lng, double distanceKm) {
-                                                                                tvLatitude.post(new Runnable() {
-                                                                                    @Override
-                                                                                    public void run() {
-                                                                                        tvLatitude.setText("纬度：" + lat);
-                                                                                        tvLongitude.setText("经度：" + lng);
-                                                                                        tvUserWithSelfDistance.setText("当前虚拟距离：" + DistanceConverter.formatDistance(distanceKm));
-                                                                                    }
+                                                                                tvLatitude.post(() -> {
+                                                                                    tvLatitude.setText("纬度：" + lat);
+                                                                                    tvLongitude.setText("经度：" + lng);
+                                                                                    tvUserWithSelfDistance.setText("当前虚拟距离：" + DistanceConverter.formatDistance(distanceKm));
                                                                                 });
-                                                                                Log.d("LocationTracker", String.format("新中心点: %.6f, %.6f, 距离: %.3fkm", lat, lng, distanceKm));
                                                                             }
-
                                                                             @Override
                                                                             public void onFinalLocation(double lat, double lng, double distanceKm) {
-                                                                                Log.d("LocationTracker", String.format("最终位置: %.6f, %.6f, 距离: %.3fkm", lat, lng, distanceKm));
-                                                                                tvLatitude.post(new Runnable() {
-                                                                                    @Override
-                                                                                    public void run() {
-                                                                                        tvLatitude.setText("经度：" + lat);
-                                                                                        tvLongitude.setText("纬度：" + lng);
-                                                                                        tvAutoLocation.setText("追踪完成");
-                                                                                    }
+                                                                                tvLatitude.post(() -> {
+                                                                                    tvLatitude.setText("经度：" + lat);
+                                                                                    tvLongitude.setText("纬度：" + lng);
+                                                                                    tvAutoLocation.setText("追踪完成");
                                                                                 });
-
                                                                             }
-
                                                                             @NonNull
                                                                             private CoordinateTransform getCoordinateTransform() {
                                                                                 CRSFactory crsFactory = new CRSFactory();
-                                                                                CoordinateReferenceSystem wgs84 = crsFactory.createFromName("EPSG:4326"); // WGS84
+                                                                                CoordinateReferenceSystem wgs84 = crsFactory.createFromName("EPSG:4326");
                                                                                 CoordinateReferenceSystem gcj02 = crsFactory.createFromParameters("GCJ02", "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs");
                                                                                 return new BasicCoordinateTransform(wgs84, gcj02);
                                                                             }
-
-                                                                            @Override
-                                                                            public void onError(String message) {
+                                                                            @Override public void onError(String message) {
                                                                                 Log.e("LocationTracker", "错误: " + message);
                                                                             }
                                                                         });
@@ -324,17 +306,13 @@ public class UserInfoFragmentNewHook {
                                     NetworkManager.getInstance().getAsync(NetworkManager.getBluedSetUsersLocationApi(lat, lng), AuthManager.auHook(false, classLoader, fl_content.getContext()), new Callback() {
                                         @Override
                                         public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
                                         }
-
                                         @Override
                                         public void onResponse(@NonNull Call call, @NonNull Response response) {
                                             NetworkManager.getInstance().getAsync(NetworkManager.getBluedUserBasicAPI(uid), AuthManager.auHook(false, classLoader, fl_content.getContext()), new Callback() {
                                                 @Override
                                                 public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
                                                 }
-
                                                 @Override
                                                 public void onResponse(@NonNull Call call, @NonNull Response response) {
                                                     try {
@@ -367,8 +345,9 @@ public class UserInfoFragmentNewHook {
                                         }
                                     });
                                 });
+                                int bgTechSpaceId = modRes.getIdentifier("bg_tech_space", "drawable", MODULE_PACKAGE_NAME);
                                 CustomPopupWindow aMapPopupWindow = new CustomPopupWindow((Activity) fl_content.getContext(), userInfoExtraAMap, Color.parseColor("#FF0A121F"));
-                                aMapPopupWindow.setBackgroundDrawable(modRes.getDrawable(R.drawable.bg_tech_space, null));
+                                aMapPopupWindow.setBackgroundDrawable(modRes.getDrawable(bgTechSpaceId, null));
                                 aMapPopupWindow.setAnimationStyle(android.R.style.Animation_Dialog);
                                 aMapPopupWindow.showAtCenter();
                                 aMapPopupWindow.setOnDismissListener(() -> {
@@ -386,9 +365,7 @@ public class UserInfoFragmentNewHook {
                                 NetworkManager.getInstance().getAsync(NetworkManager.getBluedLiveSearchAnchorApi(name), AuthManager.auHook(false, classLoader, fl_content.getContext()), new Callback() {
                                     @Override
                                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
                                     }
-
                                     @Override
                                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                                         try {
@@ -420,7 +397,8 @@ public class UserInfoFragmentNewHook {
                             String registrationTimeEncrypt = (String) XposedHelpers.getObjectField(userInfoEntity, "registration_time_encrypt");
                             String registrationTime = ModuleTools.AesDecrypt(registrationTimeEncrypt);
                             TextView tvUserRegTime = userInfoFragmentNewExtra.findViewById(R.id.tv_user_reg_time);
-                            tvUserRegTime.setBackground(modRes.getDrawable(R.drawable.bg_tech_tag, null));
+                            int bgTechTagId3 = modRes.getIdentifier("bg_tech_tag", "drawable", MODULE_PACKAGE_NAME);
+                            tvUserRegTime.setBackground(modRes.getDrawable(bgTechTagId3, null));
                             if (!registrationTime.isEmpty()) {
                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                                 String formattedDate = sdf.format(new Date(Long.parseLong(registrationTime) * 1000L));
@@ -432,14 +410,10 @@ public class UserInfoFragmentNewHook {
                                 tvUserRegTime.setVisibility(View.GONE);
                             }
                         }
-
                     }
 
                     private void startRefreshAnimation() {
-                        // 启动旋转动画
                         rotateAnim.start();
-
-                        // 按钮缩小效果
                         ibvClean.animate()
                                 .scaleX(0.9f)
                                 .scaleY(0.9f)
@@ -449,31 +423,27 @@ public class UserInfoFragmentNewHook {
 
                     @SuppressLint("UseCompatLoadingForDrawables")
                     private void stopRefreshAnimation() {
-                        // 停止旋转并恢复原位
                         rotateAnim.cancel();
                         ibvClean.setRotation(0f);
-
-                        // 恢复按钮大小
                         ibvClean.animate()
                                 .scaleX(1f)
                                 .scaleY(1f)
                                 .setDuration(200)
                                 .start();
-
-                        // 添加完成效果（可选）
-                        ibvClean.setImageDrawable(modRes.getDrawable(R.drawable.ic_done, null));
+                        int icDoneId = modRes.getIdentifier("ic_done", "drawable", MODULE_PACKAGE_NAME);
+                        ibvClean.setImageDrawable(modRes.getDrawable(icDoneId, null));
                         handler.postDelayed(new Runnable() {
                             @SuppressLint("UseCompatLoadingForDrawables")
                             @Override
                             public void run() {
-                                ibvClean.setImageDrawable(modRes.getDrawable(R.drawable.ic_refresh, null));
+                                int icRefreshId = modRes.getIdentifier("ic_refresh", "drawable", MODULE_PACKAGE_NAME);
+                                ibvClean.setImageDrawable(modRes.getDrawable(icRefreshId, null));
                             }
                         }, 1000);
                     }
                 });
     }
 
-    // 使用时检查 Context 是否还存在
     public Context getSafeContext() {
         Context context = contextRef.get();
         if (context == null) {
