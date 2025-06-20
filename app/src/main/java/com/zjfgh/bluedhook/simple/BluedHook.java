@@ -66,7 +66,7 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                 
                 // 假设直播间Hook的实现类为PlayingOnLiveHook，需根据实际项目修改
                 // 示例：调用startHook()方法启动Hook逻辑
-                PlayingOnLiveHook.getInstance().startHook();
+               // PlayingOnLiveHook.getInstance().startHook();
             }
         } catch (Exception e) {
             Log.e("BluedHook", "初始化直播间Hook失败", e);
