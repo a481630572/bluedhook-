@@ -22,7 +22,7 @@ public class SettingsViewCreator {
     public static final int ANCHOR_MONITOR_LIVE_HOOK = 1;
     public static final int PLAYING_ON_LIVE_BASE_MODE_FRAGMENT_HOOK = 2;
     public static final int LIVE_JOIN_HIDE_HOOK = 3;
-    // 移除WS_SERVER = 4定义
+    public static final int WS_SERVER = 4;
     public static final int REC_HEW_HORN = 5;
     public static final int SHIELD_LIKE = 6;
     public static final int AUTO_LIKE = 7;
@@ -30,13 +30,12 @@ public class SettingsViewCreator {
     public SettingsViewCreator(Context context) {
         this.context = context;
         this.dbManager = SQLiteManagement.getInstance();
+        // 确保数据库初始化
+        initializeSettings();
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
     public View createSettingsView() {
-        // 初始化示例设置数据（移除WebSocket相关设置）
-        initializeSettings();
-
         // 获取所有设置项
         List<SettingItem> settingsList = dbManager.getAllSettings();
 
@@ -76,14 +75,11 @@ public class SettingsViewCreator {
             functionName.setText(setting.getFunctionName());
             description.setText(setting.getDescription());
             switchButton.setChecked(setting.isSwitchOn());
-            
-            // 移除WebSocket状态同步逻辑
-            // if (setting.getFunctionId() == WS_SERVER) {
-            //     if (BluedHook.wsServerManager != null) {
-            //         switchButton.setChecked(BluedHook.wsServerManager.isServerRunning());
-            //     }
-            // }
-            
+            if (setting.getFunctionId() == WS_SERVER) {
+                if (BluedHook.wsServerManager != null) {
+                    switchButton.setChecked(BluedHook.wsServerManager.isServerRunning());
+                }
+            }
             if (setting.getExtraDataHint().isEmpty()) {
                 extraData.setVisibility(View.GONE);
             } else {
@@ -98,31 +94,34 @@ public class SettingsViewCreator {
                 setting.setSwitchOn(isChecked);
                 if (!setting.getExtraDataHint().isEmpty())
                     extraData.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-                switchListener.onSwitchChanged(setting.getFunctionId(), isChecked);
-                
-                // 移除WebSocket开关控制逻辑
-                // if (setting.getFunctionId() == WS_SERVER) {
-                //     if (BluedHook.wsServerManager != null) {
-                //         if (isChecked) {
-                //             BluedHook.wsServerManager.startServer(Integer.parseInt(setting.getExtraData()));
-                //         } else {
-                //             BluedHook.wsServerManager.stopServer();
-                //         }
-                //     }
-                // }
+                if (switchListener != null)
+                    switchListener.onSwitchChanged(setting.getFunctionId(), isChecked);
+                if (setting.getFunctionId() == WS_SERVER) {
+                    if (BluedHook.wsServerManager != null) {
+                        if (isChecked) {
+                            BluedHook.wsServerManager.startServer(Integer.parseInt(setting.getExtraData()));
+                        } else {
+                            BluedHook.wsServerManager.stopServer();
+                        }
+                    }
+                }
             });
             extraData.addTextChangedListener(new TextWatcher() {
                 @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    // 更新数据库中的额外数据
                     dbManager.updateSettingExtraData(setting.getFunctionId(), s.toString());
                     setting.setExtraData(s.toString());
                 }
 
                 @Override
-                public void afterTextChanged(Editable s) {}
+                public void afterTextChanged(Editable s) {
+                }
             });
 
             // 将设置项添加到主布局
@@ -133,6 +132,9 @@ public class SettingsViewCreator {
     }
 
     private void initializeSettings() {
+        // 检查数据库是否已经初始化，避免重复插入
+        if (dbManager.getAllSettings().size() >= 8) return;
+
         dbManager.addOrUpdateSetting(new SettingItem(USER_INFO_FRAGMENT_NEW_HOOK,
                 "个人主页信息扩展",
                 true,
@@ -162,14 +164,13 @@ public class SettingsViewCreator {
                 "",
                 ""
         ));
-        // 移除WebSocket设置项
-        // dbManager.addOrUpdateSetting(new SettingItem(WS_SERVER,
-        //         "开启WS实时通讯",
-        //         false,
-        //         "需要配合ws客户端",
-        //         "7890",
-        //         "请输入端口号"
-        // ));
+        dbManager.addOrUpdateSetting(new SettingItem(WS_SERVER,
+                "开启WS实时通讯",
+                false,
+                "需要配合ws客户端",
+                "7890",
+                "请输入端口号"
+        ));
         dbManager.addOrUpdateSetting(new SettingItem(REC_HEW_HORN,
                 "记录飘屏",
                 false,
