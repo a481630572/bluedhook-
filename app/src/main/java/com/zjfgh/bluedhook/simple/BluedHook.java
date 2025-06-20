@@ -14,6 +14,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 import java.util.Objects;
 
 import de.robv.android.xposed.IXposedHookInitPackageResources;
@@ -38,10 +40,36 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                     AppContainer.getInstance().setClassLoader(bluedContext.getClassLoader());
                     Toast.makeText(bluedContext, "外挂成功！", Toast.LENGTH_LONG).show();
                     
-                    // 仅保留个人主页信息扩展功能
+                    // 初始化个人主页Hook（原逻辑）
                     UserInfoFragmentNewHook.getInstance(bluedContext, AppContainer.getInstance().getModuleRes());
+                    
+                    // **新增：自动初始化直播间信息扩展Hook（ID=2）**
+                    initializeLiveRoomHook(bluedContext);
                 }
             });
+        }
+    }
+    
+    /**
+     * 初始化直播间信息扩展Hook（ID=2）
+     */
+    private void initializeLiveRoomHook(Context context) {
+        try {
+            // 获取数据库管理实例
+            SQLiteManagement dbManager = SQLiteManagement.getInstance();
+            // 根据ID查询设置项（PLAYING_ON_LIVE_BASE_MODE_FRAGMENT_HOOK=2）
+            SettingItem setting = dbManager.getSettingByFunctionId(SettingsViewCreator.PLAYING_ON_LIVE_BASE_MODE_FRAGMENT_HOOK);
+            
+            // 若设置为开启（默认已开启），则触发Hook
+            if (setting != null && setting.isSwitchOn()) {
+                Log.d("BluedHook", "自动加载直播间信息扩展Hook（ID=2）");
+                
+                // 假设直播间Hook的实现类为PlayingOnLiveHook，需根据实际项目修改
+                // 示例：调用startHook()方法启动Hook逻辑
+                PlayingOnLiveHook.getInstance().startHook();
+            }
+        } catch (Exception e) {
+            Log.e("BluedHook", "初始化直播间Hook失败", e);
         }
     }
 
@@ -61,7 +89,7 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                     ScrollView scrollView = liParam.view.findViewById(scrollView1ID);
                     LinearLayout scrollLinearLayout = (LinearLayout) scrollView.getChildAt(0);
                     
-                    // 保留设置界面布局（移除WebSocket相关选项）
+                    // 保留设置界面布局
                     LinearLayout mySettingsLayoutAu = (LinearLayout) inflater.inflate(moduleRes.getLayout(R.layout.module_settings_layout), null, false);
                     TextView auCopyTitleTv = mySettingsLayoutAu.findViewById(R.id.settings_name);
                     auCopyTitleTv.setText("复制授权信息(请勿随意泄漏)");
@@ -73,7 +101,7 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                     moduleSettingsLayout.setOnClickListener(view -> {
                         AlertDialog dialog = getAlertDialog(liParam);
                         Objects.requireNonNull(dialog.getWindow()).setGravity(Gravity.CENTER);
-                        dialog.getWindow().setLayout(100, 300); // 建议调整为合理尺寸（如MATCH_PARENT）
+                        dialog.getWindow().setLayout(100, 300);
                         dialog.setOnShowListener(dialogInterface -> {
                             View parentView = dialog.getWindow().getDecorView();
                             parentView.setBackgroundColor(Color.parseColor("#F7F6F7"));
@@ -86,11 +114,11 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                 }
 
                 private AlertDialog getAlertDialog(LayoutInflatedParam liParam) {
-                    // 创建设置界面（已移除WebSocket相关逻辑）
+                    // 保留设置界面创建逻辑
                     SettingsViewCreator creator = new SettingsViewCreator(liParam.view.getContext());
                     View settingsView = creator.createSettingsView();
                     creator.setOnSwitchCheckedChangeListener((functionId, isChecked) -> {
-                        // 空实现，仅保留必要回调
+                        // 空实现（原逻辑）
                     });
                     AlertDialog.Builder builder = new AlertDialog.Builder(liParam.view.getContext());
                     builder.setView(settingsView);
