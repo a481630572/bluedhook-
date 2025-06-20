@@ -102,7 +102,7 @@ class UserInfoExtraAmapLayout {
         ));
 
         tv_username = new TextView(context);
-        tv_username.setTextSize(20f);
+        tv_username.setTextSize(16f);
         tv_username.setTextColor(Color.parseColor("#FF00F0FF"));
         tv_username.setShadowLayer(10.0f, 0f, 0f, Color.parseColor("#8000F9FF"));
         tv_username.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f));
@@ -154,7 +154,7 @@ class UserInfoExtraAmapLayout {
         ll_location_data.setId(View.generateViewId());
 
         tv_longitude = new TextView(context);
-        tv_longitude.setTextSize(15f);
+        tv_longitude.setTextSize(16f);
         tv_longitude.setTextColor(Color.parseColor("#FF00FFA3"));
         tv_longitude.setText("经度：0.00000000");
         tv_longitude.setPadding(dp2px(context, 6), dp2px(context, 2), dp2px(context, 6), dp2px(context, 2));
@@ -164,7 +164,7 @@ class UserInfoExtraAmapLayout {
         tv_longitude.setId(View.generateViewId());
 
         tv_latitude = new TextView(context);
-        tv_latitude.setTextSize(15f);
+        tv_latitude.setTextSize(16f);
         tv_latitude.setTextColor(Color.parseColor("#FF00FFA3"));
         tv_latitude.setText("纬度：0.00000000");
         tv_latitude.setPadding(dp2px(context, 6), dp2px(context, 2), dp2px(context, 6), dp2px(context, 2));
@@ -174,7 +174,7 @@ class UserInfoExtraAmapLayout {
         tv_latitude.setId(View.generateViewId());
 
         tv_location = new TextView(context);
-        tv_location.setTextSize(15f);
+        tv_location.setTextSize(16f);
         tv_location.setTextColor(Color.parseColor("#FF00FFA3"));
         tv_location.setText("地理位置：中国北京");
         tv_location.setPadding(dp2px(context, 6), dp2px(context, 2), dp2px(context, 6), dp2px(context, 2));
@@ -184,7 +184,7 @@ class UserInfoExtraAmapLayout {
         tv_location.setId(View.generateViewId());
 
         tv_user_with_self_distance = new TextView(context);
-        tv_user_with_self_distance.setTextSize(15f);
+        tv_user_with_self_distance.setTextSize(16f);
         tv_user_with_self_distance.setTextColor(Color.parseColor("#FF00FFA3"));
         tv_user_with_self_distance.setText("当前和该用户的距离：0km");
         tv_user_with_self_distance.setPadding(dp2px(context, 6), dp2px(context, 2), dp2px(context, 6), dp2px(context, 2));
@@ -202,16 +202,19 @@ class UserInfoExtraAmapLayout {
         row2.addView(ll_location_data);
 
         tv_auto_location = new TextView(context);
-        tv_auto_location.setTextSize(15f);
-        tv_auto_location.setTextColor(Color.parseColor("#FFFF0000"));
-        tv_auto_location.setText("点击自动定位");
-        tv_auto_location.setPadding(dp2px(context, 6), dp2px(context, 2), dp2px(context, 6), dp2px(context, 2));
-        LinearLayout.LayoutParams tvAutoLocParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        tv_auto_location.setLayoutParams(tvAutoLocParams);
-        tv_auto_location.setGravity(android.view.Gravity.END);
-        tv_auto_location.setId(View.generateViewId());
+tv_auto_location.setTextSize(16f);
+tv_auto_location.setTextColor(Color.parseColor("#FFFF0000"));
+tv_auto_location.setText("点我追踪位置");
+tv_auto_location.setPadding(dp2px(context, 6), dp2px(context, 2), dp2px(context, 6), dp2px(context, 2));
+
+LinearLayout.LayoutParams tvAutoLocParams = new LinearLayout.LayoutParams(
+    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+);
+tvAutoLocParams.gravity = android.view.Gravity.CENTER_HORIZONTAL; // 居中
+
+tv_auto_location.setLayoutParams(tvAutoLocParams);
+tv_auto_location.setGravity(android.view.Gravity.CENTER); // 文字居中
+tv_auto_location.setId(View.generateViewId());
 
         ll_location_root.addView(row1);
         ll_location_root.addView(row2);
@@ -272,7 +275,6 @@ class UserInfoFragmentNewExtraLayout {
         tvUserRegTime.setId(View.generateViewId());
 
         userLocateBt = new Button(context);
-        userLocateBt.setBackgroundColor(Color.TRANSPARENT);
         userLocateBt.setTextSize(16f);
         userLocateBt.setTypeface(userLocateBt.getTypeface(), android.graphics.Typeface.BOLD);
         userLocateBt.setTextColor(Color.parseColor("#FF00FFA3"));
@@ -582,7 +584,7 @@ public class UserInfoFragmentNewHook {
                                 String formattedDate = sdf.format(new Date(Long.parseLong(registrationTime) * 1000L));
                                 userInfoFragmentNewExtra.tvUserRegTime.setText("注册时间：" + formattedDate);
                                 userInfoFragmentNewExtra.tvUserRegTime.setOnClickListener(ev -> ModuleTools.copyToClipboard(contextRef.get(), "注册时间" + formattedDate, formattedDate));
-                                userInfoFragmentNewExtra.tvUserRegTime.setTextSize(13f);
+                                userInfoFragmentNewExtra.tvUserRegTime.setTextSize(16f);
                                 userInfoFragmentNewExtra.tvUserRegTime.setVisibility(View.VISIBLE);
                             } else {
                                 userInfoFragmentNewExtra.tvUserRegTime.setVisibility(View.GONE);
