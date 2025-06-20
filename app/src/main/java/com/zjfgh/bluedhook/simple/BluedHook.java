@@ -66,7 +66,7 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                 
                 // 假设主播监听Hook的实现类为AnchorMonitorHook，需根据实际项目修改
                 // 示例：调用startMonitor()方法启动监听逻辑
-                AnchorMonitorHook.getInstance().startMonitor();
+                
             }
         } catch (Exception e) {
             Log.e("BluedHook", "初始化主播开播提醒Hook失败", e);
