@@ -120,7 +120,8 @@ public class UserInfoFragmentNewHook {
                             int isHideLastDistance = XposedHelpers.getIntField(userInfoEntity, "is_hide_distance");
                             String name = (String) XposedHelpers.getObjectField(userInfoEntity, "name");
                             FrameLayout flFeedFragmentContainer = (FrameLayout) XposedHelpers.getObjectField(param.thisObject, "b");
-                            @SuppressLint("DiscouragedApi") int fl_contentID = getSafeContext().getResources().getIdentifier("fl_content", "id", getSafeContext().getPackageName());
+                            // 动态获取fl_content
+                            int fl_contentID = getSafeContext().getResources().getIdentifier("fl_content", "id", getSafeContext().getPackageName());
                             LinearLayout fl_content = flFeedFragmentContainer.findViewById(fl_contentID);
                             LayoutInflater inflater = (LayoutInflater) fl_content.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -131,14 +132,15 @@ public class UserInfoFragmentNewHook {
                             }
                             LinearLayout userInfoFragmentNewExtra = (LinearLayout) inflater.inflate(modRes.getLayout(layoutId), null);
 
-                            @SuppressLint("DiscouragedApi") int v_userinfo_card_bgID = getSafeContext().getResources().getIdentifier("v_userinfo_card_bg", "id", getSafeContext().getPackageName());
+                            // 动态获取v_userinfo_card_bg
+                            int v_userinfo_card_bgID = getSafeContext().getResources().getIdentifier("v_userinfo_card_bg", "id", getSafeContext().getPackageName());
                             View v_userinfo_card_bg = flFeedFragmentContainer.findViewById(v_userinfo_card_bgID);
                             ViewGroup viewGroup = (ViewGroup) v_userinfo_card_bg.getParent();
                             ViewGroup user_info_profile_card = (ViewGroup) viewGroup.getParent();
-                            @SuppressLint("DiscouragedApi") int ll_all_basic_infoID = getSafeContext().getResources().getIdentifier("ll_all_basic_info", "id", getSafeContext().getPackageName());
+                            int ll_all_basic_infoID = getSafeContext().getResources().getIdentifier("ll_all_basic_info", "id", getSafeContext().getPackageName());
                             ViewGroup ll_all_basic_info = flFeedFragmentContainer.findViewById(ll_all_basic_infoID);
                             user_info_profile_card.addView(userInfoFragmentNewExtra);
-                            @SuppressLint("DiscouragedApi") int cl_user_info_card_rootID = getSafeContext().getResources().getIdentifier("cl_user_info_card_root", "id", getSafeContext().getPackageName());
+                            int cl_user_info_card_rootID = getSafeContext().getResources().getIdentifier("cl_user_info_card_root", "id", getSafeContext().getPackageName());
                             ViewGroup cl_user_info_card_root = flFeedFragmentContainer.findViewById(cl_user_info_card_rootID);
                             ll_all_basic_info.post(() -> {
                                 int extraHeight = userInfoFragmentNewExtra.getMeasuredHeight();
@@ -146,7 +148,10 @@ public class UserInfoFragmentNewHook {
                                 ll_all_basic_info.invalidate();
                                 ll_all_basic_info.requestLayout();
                             });
-                            Button userInfoExtraLocate = userInfoFragmentNewExtra.findViewById(R.id.user_locate_bt);
+
+                            // 动态获取 user_locate_bt
+                            int user_locate_bt_Id = modRes.getIdentifier("user_locate_bt", "id", MODULE_PACKAGE_NAME);
+                            Button userInfoExtraLocate = userInfoFragmentNewExtra.findViewById(user_locate_bt_Id);
                             if (isHideLastDistance == 1) {
                                 userInfoExtraLocate.setVisibility(View.GONE);
                             }
@@ -159,18 +164,24 @@ public class UserInfoFragmentNewHook {
                                     throw new android.content.res.Resources.NotFoundException("找不到 user_info_extra_amap 资源");
                                 }
                                 LinearLayout userInfoExtraAMap = (LinearLayout) inflater.inflate(modRes.getLayout(amapLayoutId), null);
-                                LinearLayout llAMap = userInfoExtraAMap.findViewById(R.id.ll_aMap);
-                                LinearLayout llLocationData = userInfoExtraAMap.findViewById(R.id.ll_location_data);
-                                ImageView ivGpsIcon = userInfoExtraAMap.findViewById(R.id.iv_gps_icon);
+
+                                int ll_aMap_Id = modRes.getIdentifier("ll_aMap", "id", MODULE_PACKAGE_NAME);
+                                LinearLayout llAMap = userInfoExtraAMap.findViewById(ll_aMap_Id);
+                                int ll_location_data_Id = modRes.getIdentifier("ll_location_data", "id", MODULE_PACKAGE_NAME);
+                                LinearLayout llLocationData = userInfoExtraAMap.findViewById(ll_location_data_Id);
+                                int iv_gps_icon_Id = modRes.getIdentifier("iv_gps_icon", "id", MODULE_PACKAGE_NAME);
+                                ImageView ivGpsIcon = userInfoExtraAMap.findViewById(iv_gps_icon_Id);
                                 int gpsIconId = modRes.getIdentifier("gps_location_icon1", "drawable", MODULE_PACKAGE_NAME);
                                 ivGpsIcon.setImageDrawable(modRes.getDrawable(gpsIconId, null));
                                 int bgTechTagId2 = modRes.getIdentifier("bg_tech_tag", "drawable", MODULE_PACKAGE_NAME);
                                 llLocationData.setBackground(modRes.getDrawable(bgTechTagId2, null));
-                                LinearLayout llLocationRoot = userInfoExtraAMap.findViewById(R.id.ll_location_root);
+                                int ll_location_root_Id = modRes.getIdentifier("ll_location_root", "id", MODULE_PACKAGE_NAME);
+                                LinearLayout llLocationRoot = userInfoExtraAMap.findViewById(ll_location_root_Id);
                                 int bgTechInnerId = modRes.getIdentifier("bg_tech_item_inner", "drawable", MODULE_PACKAGE_NAME);
                                 llLocationRoot.setBackground(modRes.getDrawable(bgTechInnerId, null));
                                 AMapHookHelper aMapHelper = new AMapHookHelper(fl_content.getContext(), fl_content.getContext().getClassLoader());
-                                ibvClean = userInfoExtraAMap.findViewById(R.id.iv_clean_icon);
+                                int iv_clean_icon_Id = modRes.getIdentifier("iv_clean_icon", "id", MODULE_PACKAGE_NAME);
+                                ibvClean = userInfoExtraAMap.findViewById(iv_clean_icon_Id);
                                 int techBtnBgId = modRes.getIdentifier("tech_button_bg", "drawable", MODULE_PACKAGE_NAME);
                                 ibvClean.setBackground(modRes.getDrawable(techBtnBgId, null));
                                 int icRefreshId = modRes.getIdentifier("ic_refresh", "drawable", MODULE_PACKAGE_NAME);
@@ -197,17 +208,25 @@ public class UserInfoFragmentNewHook {
                                 });
                                 View aMapView = aMapHelper.createMapView();
                                 llAMap.addView(aMapView);
-                                TextView tv_username = userInfoExtraAMap.findViewById(R.id.tv_username);
+
+                                int tv_username_Id = modRes.getIdentifier("tv_username", "id", MODULE_PACKAGE_NAME);
+                                TextView tv_username = userInfoExtraAMap.findViewById(tv_username_Id);
                                 tv_username.setText(name);
-                                TextView tvAutoLocation = userInfoExtraAMap.findViewById(R.id.tv_auto_location);
+
+                                int tv_auto_location_Id = modRes.getIdentifier("tv_auto_location", "id", MODULE_PACKAGE_NAME);
+                                TextView tvAutoLocation = userInfoExtraAMap.findViewById(tv_auto_location_Id);
                                 int bgAutoLocId = modRes.getIdentifier("bg_auto_location_button", "drawable", MODULE_PACKAGE_NAME);
                                 tvAutoLocation.setBackground(modRes.getDrawable(bgAutoLocId, null));
-                                TextView tvLongitude = userInfoExtraAMap.findViewById(R.id.tv_longitude);
-                                TextView tvLatitude = userInfoExtraAMap.findViewById(R.id.tv_latitude);
-                                TextView tvLocation = userInfoExtraAMap.findViewById(R.id.tv_location);
+                                int tv_longitude_Id = modRes.getIdentifier("tv_longitude", "id", MODULE_PACKAGE_NAME);
+                                TextView tvLongitude = userInfoExtraAMap.findViewById(tv_longitude_Id);
+                                int tv_latitude_Id = modRes.getIdentifier("tv_latitude", "id", MODULE_PACKAGE_NAME);
+                                TextView tvLatitude = userInfoExtraAMap.findViewById(tv_latitude_Id);
+                                int tv_location_Id = modRes.getIdentifier("tv_location", "id", MODULE_PACKAGE_NAME);
+                                TextView tvLocation = userInfoExtraAMap.findViewById(tv_location_Id);
                                 String location = (String) XposedHelpers.getObjectField(userInfoEntity, "location");
                                 tvLocation.setText("真实位置(距离)：" + location);
-                                TextView tvUserWithSelfDistance = userInfoExtraAMap.findViewById(R.id.tv_user_with_self_distance);
+                                int tv_user_with_self_distance_Id = modRes.getIdentifier("tv_user_with_self_distance", "id", MODULE_PACKAGE_NAME);
+                                TextView tvUserWithSelfDistance = userInfoExtraAMap.findViewById(tv_user_with_self_distance_Id);
                                 tvUserWithSelfDistance.setVisibility(View.GONE);
                                 aMapHelper.onCreate(null);
                                 aMapHelper.onResume();
@@ -356,7 +375,8 @@ public class UserInfoFragmentNewHook {
                                 });
                             });
                             if (isHideLastOperate == 1 && isAnchor == 1) {
-                                @SuppressLint("DiscouragedApi") ViewGroup rlBasicInfoRoot = flFeedFragmentContainer.findViewById(getSafeContext().getResources().getIdentifier("rl_basic_info_root", "id", getSafeContext().getPackageName()));
+                                int rl_basic_info_root_Id = getSafeContext().getResources().getIdentifier("rl_basic_info_root", "id", getSafeContext().getPackageName());
+                                ViewGroup rlBasicInfoRoot = flFeedFragmentContainer.findViewById(rl_basic_info_root_Id);
                                 HorizontalScrollView horizontalScrollView = (HorizontalScrollView) rlBasicInfoRoot.getChildAt(0);
                                 LinearLayout linearLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
                                 TextView tvLastOperateAnchor = new TextView(currentView.getContext());
@@ -396,7 +416,9 @@ public class UserInfoFragmentNewHook {
                             }
                             String registrationTimeEncrypt = (String) XposedHelpers.getObjectField(userInfoEntity, "registration_time_encrypt");
                             String registrationTime = ModuleTools.AesDecrypt(registrationTimeEncrypt);
-                            TextView tvUserRegTime = userInfoFragmentNewExtra.findViewById(R.id.tv_user_reg_time);
+
+                            int tv_user_reg_time_Id = modRes.getIdentifier("tv_user_reg_time", "id", MODULE_PACKAGE_NAME);
+                            TextView tvUserRegTime = userInfoFragmentNewExtra.findViewById(tv_user_reg_time_Id);
                             int bgTechTagId3 = modRes.getIdentifier("bg_tech_tag", "drawable", MODULE_PACKAGE_NAME);
                             tvUserRegTime.setBackground(modRes.getDrawable(bgTechTagId3, null));
                             if (!registrationTime.isEmpty()) {
