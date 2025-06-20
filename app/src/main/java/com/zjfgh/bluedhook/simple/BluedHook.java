@@ -39,7 +39,7 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                     Context bluedContext = (Context) param.args[0];
                     AppContainer.getInstance().setBluedContext(bluedContext);
                     AppContainer.getInstance().setClassLoader(bluedContext.getClassLoader());
-                    Toast.makeText(bluedContext, "外挂成功！", Toast.LENGTH_LONG).show();
+                    // Toast.makeText(bluedContext, "外挂成功！", Toast.LENGTH_LONG).show();
 
                     // 模块加载时确保设置项已初始化
                     new SettingsViewCreator(bluedContext);
