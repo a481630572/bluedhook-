@@ -454,7 +454,7 @@ public class UserInfoFragmentNewHook {
                                                                                     int isHideDistance = userData.getInt("is_hide_distance");
                                                                                     double distanceKm = userData.getDouble("distance");
                                                                                     if (isHideDistance == 0) {
-                                                                                        aMapHelper.addCircle(initialLat, initialLat, DistanceConverter.kmToMeters(distanceKm), "#003399FF", #FF000000");
+                                                                                        aMapHelper.addCircle(initialLat, initialLat, DistanceConverter.kmToMeters(distanceKm), "#003399FF", 0xFF000000);
                                                                                         amapLayout.tv_user_with_self_distance.post(() -> {
                                                                                             amapLayout.tv_user_with_self_distance.setText("当前虚拟距离：" + DistanceConverter.formatDistance(distanceKm));
                                                                                             amapLayout.tv_user_with_self_distance.setVisibility(View.VISIBLE);
