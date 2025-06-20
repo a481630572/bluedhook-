@@ -22,7 +22,7 @@ public class SettingsViewCreator {
     public static final int ANCHOR_MONITOR_LIVE_HOOK = 1;
     public static final int PLAYING_ON_LIVE_BASE_MODE_FRAGMENT_HOOK = 2;
     public static final int LIVE_JOIN_HIDE_HOOK = 3;
-    public static final int WS_SERVER = 4;
+    // 移除WS_SERVER = 4定义
     public static final int REC_HEW_HORN = 5;
     public static final int SHIELD_LIKE = 6;
     public static final int AUTO_LIKE = 7;
@@ -34,7 +34,7 @@ public class SettingsViewCreator {
 
     @SuppressLint("UseCompatLoadingForDrawables")
     public View createSettingsView() {
-        // 初始化示例设置数据
+        // 初始化示例设置数据（移除WebSocket相关设置）
         initializeSettings();
 
         // 获取所有设置项
@@ -76,11 +76,14 @@ public class SettingsViewCreator {
             functionName.setText(setting.getFunctionName());
             description.setText(setting.getDescription());
             switchButton.setChecked(setting.isSwitchOn());
-            if (setting.getFunctionId() == WS_SERVER) {
-                if (BluedHook.wsServerManager != null) {
-                    switchButton.setChecked(BluedHook.wsServerManager.isServerRunning());
-                }
-            }
+            
+            // 移除WebSocket状态同步逻辑
+            // if (setting.getFunctionId() == WS_SERVER) {
+            //     if (BluedHook.wsServerManager != null) {
+            //         switchButton.setChecked(BluedHook.wsServerManager.isServerRunning());
+            //     }
+            // }
+            
             if (setting.getExtraDataHint().isEmpty()) {
                 extraData.setVisibility(View.GONE);
             } else {
@@ -96,32 +99,30 @@ public class SettingsViewCreator {
                 if (!setting.getExtraDataHint().isEmpty())
                     extraData.setVisibility(isChecked ? View.VISIBLE : View.GONE);
                 switchListener.onSwitchChanged(setting.getFunctionId(), isChecked);
-                if (setting.getFunctionId() == WS_SERVER) {
-                    if (BluedHook.wsServerManager != null) {
-                        if (isChecked) {
-                            BluedHook.wsServerManager.startServer(Integer.parseInt(setting.getExtraData()));
-                        } else {
-                            BluedHook.wsServerManager.stopServer();
-                        }
-                    }
-                }
+                
+                // 移除WebSocket开关控制逻辑
+                // if (setting.getFunctionId() == WS_SERVER) {
+                //     if (BluedHook.wsServerManager != null) {
+                //         if (isChecked) {
+                //             BluedHook.wsServerManager.startServer(Integer.parseInt(setting.getExtraData()));
+                //         } else {
+                //             BluedHook.wsServerManager.stopServer();
+                //         }
+                //     }
+                // }
             });
             extraData.addTextChangedListener(new TextWatcher() {
                 @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                }
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    // 更新数据库中的额外数据
                     dbManager.updateSettingExtraData(setting.getFunctionId(), s.toString());
                     setting.setExtraData(s.toString());
                 }
 
                 @Override
-                public void afterTextChanged(Editable s) {
-                }
+                public void afterTextChanged(Editable s) {}
             });
 
             // 将设置项添加到主布局
@@ -161,13 +162,14 @@ public class SettingsViewCreator {
                 "",
                 ""
         ));
-        dbManager.addOrUpdateSetting(new SettingItem(WS_SERVER,
-                "开启WS实时通讯",
-                false,
-                "需要配合ws客户端",
-                "7890",
-                "请输入端口号"
-        ));
+        // 移除WebSocket设置项
+        // dbManager.addOrUpdateSetting(new SettingItem(WS_SERVER,
+        //         "开启WS实时通讯",
+        //         false,
+        //         "需要配合ws客户端",
+        //         "7890",
+        //         "请输入端口号"
+        // ));
         dbManager.addOrUpdateSetting(new SettingItem(REC_HEW_HORN,
                 "记录飘屏",
                 false,
