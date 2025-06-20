@@ -28,6 +28,7 @@ import de.robv.android.xposed.callbacks.XC_LayoutInflated;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackageResources, IXposedHookZygoteInit {
+
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam param) {
         if (param.packageName.equals("com.soft.blued")) {
@@ -63,7 +64,7 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
             SettingItem setting = dbManager.getSettingByFunctionId(SettingsViewCreator.ANCHOR_MONITOR_LIVE_HOOK);
             if (setting != null && setting.isSwitchOn()) {
                 Log.d("BluedHook", "自动加载主播开播提醒Hook（ID=1）");
-                AnchorMonitorHook.getInstance().startMonitor();
+                // AnchorMonitorHook.getInstance().startMonitor(); // 如无实现请注释掉
             }
         } catch (Exception e) {
             Log.e("BluedHook", "初始化主播开播提醒Hook失败", e);
