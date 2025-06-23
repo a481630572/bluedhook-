@@ -19,7 +19,9 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.io.IOException;
-
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import androidx.annotation.NonNull;
 
 import org.json.JSONArray;
@@ -110,15 +112,21 @@ class UserInfoExtraAmapLayout {
         tv_username.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         tv_username.setId(View.generateViewId());
 
+        // 刷新按钮（带 emoji 图标）
         iv_clean_icon = new ImageButton(context);
         LinearLayout.LayoutParams ivCleanParams = new LinearLayout.LayoutParams(
-                dp2px(context, 40),
-                dp2px(context, 40)
+            dp2px(context, 40),
+            dp2px(context, 40)
         );
         iv_clean_icon.setLayoutParams(ivCleanParams);
         iv_clean_icon.setId(View.generateViewId());
         iv_clean_icon.setContentDescription("刷新");
         iv_clean_icon.setBackgroundColor(Color.TRANSPARENT);
+        iv_clean_icon.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+
+        // 用 Emoji 作为图标
+        iv_clean_icon.setImageDrawable(null);
+        iv_clean_icon.setImageBitmap(textAsBitmap("🔄", 40, Color.parseColor("#00BFFF")));
 
         row1.addView(tv_username);
         row1.addView(iv_clean_icon);
@@ -202,19 +210,19 @@ class UserInfoExtraAmapLayout {
         row2.addView(ll_location_data);
 
         tv_auto_location = new TextView(context);
-tv_auto_location.setTextSize(16f);
-tv_auto_location.setTextColor(Color.parseColor("#FFFF0000"));
-tv_auto_location.setText("点我追踪位置");
-tv_auto_location.setPadding(dp2px(context, 6), dp2px(context, 2), dp2px(context, 6), dp2px(context, 2));
+        tv_auto_location.setTextSize(16f);
+        tv_auto_location.setTextColor(Color.parseColor("#FFFF0000"));
+        tv_auto_location.setText("点我追踪位置");
+        tv_auto_location.setPadding(dp2px(context, 6), dp2px(context, 2), dp2px(context, 6), dp2px(context, 2));
 
-LinearLayout.LayoutParams tvAutoLocParams = new LinearLayout.LayoutParams(
-    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
-);
-tvAutoLocParams.gravity = android.view.Gravity.CENTER_HORIZONTAL; // 居中
+        LinearLayout.LayoutParams tvAutoLocParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        tvAutoLocParams.gravity = android.view.Gravity.CENTER_HORIZONTAL;
 
-tv_auto_location.setLayoutParams(tvAutoLocParams);
-tv_auto_location.setGravity(android.view.Gravity.CENTER); // 文字居中
-tv_auto_location.setId(View.generateViewId());
+        tv_auto_location.setLayoutParams(tvAutoLocParams);
+        tv_auto_location.setGravity(android.view.Gravity.CENTER);
+        tv_auto_location.setId(View.generateViewId());
 
         ll_location_root.addView(row1);
         ll_location_root.addView(row2);
@@ -228,6 +236,20 @@ tv_auto_location.setId(View.generateViewId());
 
     private int dp2px(Context context, float dp) {
         return (int) (dp * context.getResources().getDisplayMetrics().density + 0.5f);
+    }
+
+    private Bitmap textAsBitmap(String text, float textSize, int textColor) {
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setTextSize(textSize);
+        paint.setColor(textColor);
+        paint.setTextAlign(Paint.Align.LEFT);
+        float baseline = -paint.ascent();
+        int width = (int) (paint.measureText(text) + 0.5f);
+        int height = (int) (baseline + paint.descent() + 0.5f);
+        Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(image);
+        canvas.drawText(text, 0, baseline, paint);
+        return image;
     }
 }
 
