@@ -1,22 +1,12 @@
 package com.zjfgh.bluedhook.simple;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
+import android.app.Application;
 import android.content.Context;
 import android.content.res.XModuleResources;
-import android.graphics.Color;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import org.json.JSONObject;
-
-import java.util.Objects;
 
 import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -30,28 +20,27 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackageResources, IXposedHookZygoteInit {
 
     @Override
-    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam param) {
-        if (param.packageName.equals("com.soft.blued")) {
-            XposedHelpers.findAndHookMethod("com.soft.blued.StubWrapperProxyApplication", param.classLoader, "initProxyApplication", Context.class, new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    super.afterHookedMethod(param);
-                    Context bluedContext = (Context) param.args[0];
-                    AppContainer.getInstance().setBluedContext(bluedContext);
-                    AppContainer.getInstance().setClassLoader(bluedContext.getClassLoader());
-                    // Toast.makeText(bluedContext, "外挂成功！", Toast.LENGTH_LONG).show();
+    public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam lpparam) {
+        if (lpparam.packageName == null || !lpparam.packageName.equals("com.soft.blued")) return;
 
-                    // 模块加载时确保设置项已初始化
-                    new SettingsViewCreator(bluedContext);
+        // 使用 Application.attach 的方式获取 context 和 classloader，兼容所有版本
+        XposedHelpers.findAndHookMethod(Application.class, "attach", Context.class, new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                Context bluedContext = (Context) param.args[0];
+                AppContainer.getInstance().setBluedContext(bluedContext);
+                AppContainer.getInstance().setClassLoader(bluedContext.getClassLoader());
 
-                    // 初始化个人主页Hook（原逻辑）
-                    UserInfoFragmentNewHook.getInstance(bluedContext, AppContainer.getInstance().getModuleRes());
+                // 模块加载时确保设置项已初始化
+                new SettingsViewCreator(bluedContext);
 
-                    // 自动初始化主播开播提醒Hook
-                    initializeAnchorMonitorHook(bluedContext);
-                }
-            });
-        }
+                // 初始化个人主页Hook（原逻辑）
+                UserInfoFragmentNewHook.getInstance(bluedContext, AppContainer.getInstance().getModuleRes());
+
+                // 自动初始化主播开播提醒Hook
+                initializeAnchorMonitorHook(bluedContext);
+            }
+        });
     }
 
     /**
@@ -71,21 +60,21 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
         }
     }
 
-   @Override
-public void handleInitPackageResources(XC_InitPackageResources.InitPackageResourcesParam resParam) {
-    if (resParam.packageName.equals("com.soft.blued")) {
-        String modulePath = AppContainer.getInstance().getModulePath();
-        XModuleResources moduleRes = XModuleResources.createInstance(modulePath, resParam.res);
-        AppContainer.getInstance().setModuleRes(moduleRes);
-        resParam.res.hookLayout("com.soft.blued", "layout", "fragment_settings", new XC_LayoutInflated() {
-            @SuppressLint({"ResourceType", "SetTextI18n"})
-            @Override
-            public void handleLayoutInflated(LayoutInflatedParam liParam) {
-                // 已删除插入自定义设置项的代码
-            }
-        });
+    @Override
+    public void handleInitPackageResources(XC_InitPackageResources.InitPackageResourcesParam resParam) {
+        if (resParam.packageName.equals("com.soft.blued")) {
+            String modulePath = AppContainer.getInstance().getModulePath();
+            XModuleResources moduleRes = XModuleResources.createInstance(modulePath, resParam.res);
+            AppContainer.getInstance().setModuleRes(moduleRes);
+            resParam.res.hookLayout("com.soft.blued", "layout", "fragment_settings", new XC_LayoutInflated() {
+                @SuppressLint({"ResourceType", "SetTextI18n"})
+                @Override
+                public void handleLayoutInflated(LayoutInflatedParam liParam) {
+                    // 已删除插入自定义设置项的代码
+                }
+            });
+        }
     }
-}
 
     @Override
     public void initZygote(StartupParam startupParam) {
