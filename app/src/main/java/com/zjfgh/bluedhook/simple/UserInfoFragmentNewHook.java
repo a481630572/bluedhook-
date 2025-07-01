@@ -329,6 +329,7 @@ class UserInfoFragmentNewExtraLayout {
     }
 }
 
+
 public class UserInfoFragmentNewHook {
     private static final String USER_INFO_ENTITY_CLASS = "com.soft.blued.ui.user.model.UserInfoEntity";
     private static final String TARGET_CLASS = "com.soft.blued.ui.user.fragment.UserInfoFragmentNew";
@@ -360,14 +361,15 @@ public class UserInfoFragmentNewHook {
     private ObjectAnimator rotateAnim;
     private final Handler handler = new Handler();
 
-    // 写入定位到目标程序 files/current_location.txt，昵称后加⭐，去重
+    // 写入定位到目标程序 files/current_location.txt，格式：纬度,经度,昵称（或备注）⭐yyyy年M月d号⭐，去重，每条单独一行
     private void writeLocationToCurrentFile(Context context, double latitude, double longitude, String nickname) {
         try {
             File file = new File(context.getFilesDir(), CURRENT_LOCATION_FILE);
-            // 昵称后加⭐
-            String content = "latitude: " + latitude + ", longitude: " + longitude + " " + nickname + "⭐";
-
-            // 检查是否已存在
+            // 获取当前日期字符串（如2025年7月1号）
+            String dateStr = new SimpleDateFormat("yyyy年M月d号", Locale.getDefault()).format(new Date());
+            // 拼接：纬度,经度,昵称⭐日期⭐
+            String content = latitude + "," + longitude + "," + nickname + "⭐" + dateStr + "⭐";
+            // 去重
             boolean alreadyExists = false;
             if (file.exists()) {
                 BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -382,7 +384,10 @@ public class UserInfoFragmentNewHook {
             }
             if (!alreadyExists) {
                 FileWriter writer = new FileWriter(file, true);
-                writer.write(content + "\n");
+                if (file.length() > 0) {
+                    writer.write("\n"); // 如果已有内容，先换行再追加
+                }
+                writer.write(content);
                 writer.close();
             }
         } catch (Exception e) {
