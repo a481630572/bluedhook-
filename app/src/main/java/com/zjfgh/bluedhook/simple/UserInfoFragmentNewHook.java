@@ -28,6 +28,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import androidx.annotation.NonNull;
+import android.text.TextUtils;
+import android.util.TypedValue;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -287,12 +289,6 @@ class UserInfoFragmentNewExtraLayout {
         tvUserRegTime.setTypeface(tvUserRegTime.getTypeface(), android.graphics.Typeface.BOLD);
         tvUserRegTime.setTextColor(Color.parseColor("#FF00FFA3"));
         tvUserRegTime.setPadding(dp2px(context, 20), dp2px(context, 4), dp2px(context, 20), dp2px(context, 4));
-        LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        tvParams.setMarginEnd(dp2px(context, 10));
-        tvUserRegTime.setLayoutParams(tvParams);
         tvUserRegTime.setMinWidth(0);
         tvUserRegTime.setMinHeight(0);
         tvUserRegTime.setIncludeFontPadding(false);
@@ -301,42 +297,43 @@ class UserInfoFragmentNewExtraLayout {
         tvUserRegTime.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
         tvUserRegTime.setId(View.generateViewId());
 
+        // 设置TextView权重为2
+        LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
+            0,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            2f // 权重2
+        );
+        tvParams.setMarginEnd(dp2px(context, 10));
+        tvUserRegTime.setLayoutParams(tvParams);
+
         userLocateBt = new Button(context);
-userLocateBt.setBackgroundColor(Color.TRANSPARENT);
-userLocateBt.setTextSize(14f); // 字体略减小
-userLocateBt.setTypeface(userLocateBt.getTypeface(), android.graphics.Typeface.BOLD);
-userLocateBt.setTextColor(Color.parseColor("#FF00FFA3"));
-userLocateBt.setPadding(dp2px(context, 10), dp2px(context, 4), dp2px(context, 10), dp2px(context, 4));
-userLocateBt.setSingleLine(true);
-userLocateBt.setEllipsize(android.text.TextUtils.TruncateAt.END);
-userLocateBt.setMaxWidth(dp2px(context, 100)); // 最大宽100dp
-userLocateBt.setMinWidth(dp2px(context, 50));  // 最小宽50dp
-userLocateBt.setMaxLines(1);
-userLocateBt.setIncludeFontPadding(false);
-userLocateBt.setText("定位追踪");
-userLocateBt.setLetterSpacing(0.05f);
-userLocateBt.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
-userLocateBt.setId(View.generateViewId());
+        userLocateBt.setBackgroundColor(Color.TRANSPARENT);
+        userLocateBt.setTextSize(14f); // 字体略减小
+        userLocateBt.setTypeface(userLocateBt.getTypeface(), android.graphics.Typeface.BOLD);
+        userLocateBt.setTextColor(Color.parseColor("#FF00FFA3"));
+        userLocateBt.setPadding(dp2px(context, 10), dp2px(context, 4), dp2px(context, 10), dp2px(context, 4));
+        userLocateBt.setSingleLine(true);
+        userLocateBt.setEllipsize(TextUtils.TruncateAt.END);
+        userLocateBt.setMaxWidth(dp2px(context, 100)); // 最大宽100dp
+        userLocateBt.setMinWidth(dp2px(context, 50));  // 最小宽50dp
+        userLocateBt.setMaxLines(1);
+        userLocateBt.setIncludeFontPadding(false);
+        userLocateBt.setText("定位追踪");
+        userLocateBt.setLetterSpacing(0.05f);
+        userLocateBt.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
+        userLocateBt.setId(View.generateViewId());
 
-// 用权重保证按钮和左侧textview都有空间
-LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
-    0,
-    LinearLayout.LayoutParams.WRAP_CONTENT,
-    1f // 权重1
-);
-userLocateBt.setLayoutParams(btnParams);
+        // 设置Button权重为1
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
+            0,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            1f // 权重1
+        );
+        userLocateBt.setLayoutParams(btnParams);
 
-// 你原来的inner布局可以这样保证两个控件分配空间
-LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
-    0,
-    LinearLayout.LayoutParams.WRAP_CONTENT,
-    2f // 权重2，可以根据内容长短调整
-);
-tvUserRegTime.setLayoutParams(tvParams);
-
-inner.addView(tvUserRegTime);
-inner.addView(userLocateBt);
-root.addView(inner);
+        inner.addView(tvUserRegTime);
+        inner.addView(userLocateBt);
+        root.addView(inner);
     }
 
     private int dp2px(Context context, float dp) {
