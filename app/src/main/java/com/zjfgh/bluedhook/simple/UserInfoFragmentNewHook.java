@@ -285,7 +285,7 @@ class UserInfoFragmentNewExtraLayout {
         inner.setId(View.generateViewId());
 
         tvUserRegTime = new TextView(context);
-        tvUserRegTime.setTextSize(16f);
+        tvUserRegTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         tvUserRegTime.setTypeface(tvUserRegTime.getTypeface(), android.graphics.Typeface.BOLD);
         tvUserRegTime.setTextColor(Color.parseColor("#FF00FFA3"));
         tvUserRegTime.setPadding(dp2px(context, 20), dp2px(context, 4), dp2px(context, 20), dp2px(context, 4));
@@ -651,7 +651,7 @@ public class UserInfoFragmentNewHook {
                                 String formattedDate = sdf.format(new Date(Long.parseLong(registrationTime) * 1000L));
                                 userInfoFragmentNewExtra.tvUserRegTime.setText("注册时间：" + formattedDate);
                                 userInfoFragmentNewExtra.tvUserRegTime.setOnClickListener(ev -> ModuleTools.copyToClipboard(contextRef.get(), "注册时间" + formattedDate, formattedDate));
-                                userInfoFragmentNewExtra.tvUserRegTime.setTextSize(16f);
+                                userInfoFragmentNewExtra.tvUserRegTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
                                 userInfoFragmentNewExtra.tvUserRegTime.setVisibility(View.VISIBLE);
                             } else {
                                 userInfoFragmentNewExtra.tvUserRegTime.setVisibility(View.GONE);
