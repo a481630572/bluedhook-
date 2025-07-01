@@ -292,7 +292,7 @@ class UserInfoFragmentNewExtraLayout {
         tvUserRegTime.setMinWidth(0);
         tvUserRegTime.setMinHeight(0);
         tvUserRegTime.setIncludeFontPadding(false);
-        tvUserRegTime.setText("注册时间：0000-00-00 00:00:00");
+        tvUserRegTime.setText("注册：0000-00-00 00:00:00");
         tvUserRegTime.setLetterSpacing(0.05f);
         tvUserRegTime.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
         tvUserRegTime.setId(View.generateViewId());
@@ -649,8 +649,8 @@ public class UserInfoFragmentNewHook {
                             if (!registrationTime.isEmpty()) {
                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                                 String formattedDate = sdf.format(new Date(Long.parseLong(registrationTime) * 1000L));
-                                userInfoFragmentNewExtra.tvUserRegTime.setText("注册时间：" + formattedDate);
-                                userInfoFragmentNewExtra.tvUserRegTime.setOnClickListener(ev -> ModuleTools.copyToClipboard(contextRef.get(), "注册时间" + formattedDate, formattedDate));
+                                userInfoFragmentNewExtra.tvUserRegTime.setText("注册：" + formattedDate);
+                                userInfoFragmentNewExtra.tvUserRegTime.setOnClickListener(ev -> ModuleTools.copyToClipboard(contextRef.get(), "注册" + formattedDate, formattedDate));
                                 userInfoFragmentNewExtra.tvUserRegTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
                                 userInfoFragmentNewExtra.tvUserRegTime.setVisibility(View.VISIBLE);
                             } else {
