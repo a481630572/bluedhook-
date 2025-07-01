@@ -291,7 +291,7 @@ class UserInfoFragmentNewExtraLayout {
         tvUserRegTime.setMinWidth(0);
         tvUserRegTime.setMinHeight(0);
         tvUserRegTime.setIncludeFontPadding(false);
-        tvUserRegTime.setText("注册时间：0000-00-00 00:00:00");
+        tvUserRegTime.setText("注册：0000-00-00 00:00:00");
         tvUserRegTime.setLetterSpacing(0.05f);
         tvUserRegTime.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
         tvUserRegTime.setId(View.generateViewId());
@@ -309,7 +309,7 @@ class UserInfoFragmentNewExtraLayout {
         userLocateBt.setMinWidth(0);
         userLocateBt.setMinHeight(0);
         userLocateBt.setIncludeFontPadding(false);
-        userLocateBt.setText("定位到此用户");
+        userLocateBt.setText("定位追踪");
         userLocateBt.setLetterSpacing(0.05f);
         userLocateBt.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
         userLocateBt.setId(View.generateViewId());
