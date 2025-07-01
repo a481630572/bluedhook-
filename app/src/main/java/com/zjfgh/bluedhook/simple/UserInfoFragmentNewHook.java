@@ -364,7 +364,7 @@ public class UserInfoFragmentNewHook {
     // 写入定位到目标程序 files/locations.txt，格式：纬度,经度,昵称（或备注）⭐yyyy年M月d号⭐，去重，每条单独一行
     private void writeLocationToCurrentFile(Context context, double latitude, double longitude, String nickname) {
     try {
-        File file = new File(context.getFilesDir(), CURRENT_LOCATION_FILE);
+        File file = new File(context.getFilesDir(), LOCATION_HISTORY_FILE);
         String dateStr = new SimpleDateFormat("yyyy年M月d号", Locale.getDefault()).format(new Date());
         String content = latitude + "," + longitude + "," + nickname + "⭐" + dateStr + "⭐" + "\n";
         // 去重
