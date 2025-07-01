@@ -302,26 +302,41 @@ class UserInfoFragmentNewExtraLayout {
         tvUserRegTime.setId(View.generateViewId());
 
         userLocateBt = new Button(context);
-        userLocateBt.setBackgroundColor(Color.TRANSPARENT);
-        userLocateBt.setTextSize(16f);
-        userLocateBt.setTypeface(userLocateBt.getTypeface(), android.graphics.Typeface.BOLD);
-        userLocateBt.setTextColor(Color.parseColor("#FF00FFA3"));
-        userLocateBt.setPadding(dp2px(context, 20), dp2px(context, 4), dp2px(context, 20), dp2px(context, 4));
-        userLocateBt.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        ));
-        userLocateBt.setMinWidth(0);
-        userLocateBt.setMinHeight(0);
-        userLocateBt.setIncludeFontPadding(false);
-        userLocateBt.setText("定位追踪");
-        userLocateBt.setLetterSpacing(0.05f);
-        userLocateBt.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
-        userLocateBt.setId(View.generateViewId());
+userLocateBt.setBackgroundColor(Color.TRANSPARENT);
+userLocateBt.setTextSize(14f); // 字体略减小
+userLocateBt.setTypeface(userLocateBt.getTypeface(), android.graphics.Typeface.BOLD);
+userLocateBt.setTextColor(Color.parseColor("#FF00FFA3"));
+userLocateBt.setPadding(dp2px(context, 10), dp2px(context, 4), dp2px(context, 10), dp2px(context, 4));
+userLocateBt.setSingleLine(true);
+userLocateBt.setEllipsize(android.text.TextUtils.TruncateAt.END);
+userLocateBt.setMaxWidth(dp2px(context, 100)); // 最大宽100dp
+userLocateBt.setMinWidth(dp2px(context, 50));  // 最小宽50dp
+userLocateBt.setMaxLines(1);
+userLocateBt.setIncludeFontPadding(false);
+userLocateBt.setText("定位追踪");
+userLocateBt.setLetterSpacing(0.05f);
+userLocateBt.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
+userLocateBt.setId(View.generateViewId());
 
-        inner.addView(tvUserRegTime);
-        inner.addView(userLocateBt);
-        root.addView(inner);
+// 用权重保证按钮和左侧textview都有空间
+LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
+    0,
+    LinearLayout.LayoutParams.WRAP_CONTENT,
+    1f // 权重1
+);
+userLocateBt.setLayoutParams(btnParams);
+
+// 你原来的inner布局可以这样保证两个控件分配空间
+LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
+    0,
+    LinearLayout.LayoutParams.WRAP_CONTENT,
+    2f // 权重2，可以根据内容长短调整
+);
+tvUserRegTime.setLayoutParams(tvParams);
+
+inner.addView(tvUserRegTime);
+inner.addView(userLocateBt);
+root.addView(inner);
     }
 
     private int dp2px(Context context, float dp) {
