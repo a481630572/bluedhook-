@@ -291,7 +291,7 @@ class UserInfoFragmentNewExtraLayout {
         tvUserRegTime.setMinWidth(0);
         tvUserRegTime.setMinHeight(0);
         tvUserRegTime.setIncludeFontPadding(false);
-        tvUserRegTime.setText("注册：0000-00-00 00:00:00");
+        tvUserRegTime.setText("注册时间：0000-00-00 00:00:00");
         tvUserRegTime.setLetterSpacing(0.05f);
         tvUserRegTime.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
         tvUserRegTime.setId(View.generateViewId());
