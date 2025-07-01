@@ -19,6 +19,11 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.io.IOException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import android.widget.Toast;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -112,7 +117,7 @@ class UserInfoExtraAmapLayout {
         tv_username.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         tv_username.setId(View.generateViewId());
 
-        // 刷新按钮（带 emoji 图标）
+        // "收藏"按钮（⭐图标）
         iv_clean_icon = new ImageButton(context);
         LinearLayout.LayoutParams ivCleanParams = new LinearLayout.LayoutParams(
             dp2px(context, 40),
@@ -120,13 +125,13 @@ class UserInfoExtraAmapLayout {
         );
         iv_clean_icon.setLayoutParams(ivCleanParams);
         iv_clean_icon.setId(View.generateViewId());
-        iv_clean_icon.setContentDescription("刷新");
+        iv_clean_icon.setContentDescription("收藏");
         iv_clean_icon.setBackgroundColor(Color.TRANSPARENT);
         iv_clean_icon.setScaleType(android.widget.ImageView.ScaleType.CENTER);
 
-        // 用 Emoji 作为图标
+        // 用 Emoji "⭐" 作为图标
         iv_clean_icon.setImageDrawable(null);
-        iv_clean_icon.setImageBitmap(textAsBitmap("🔄", 40, Color.parseColor("#00BFFF")));
+        iv_clean_icon.setImageBitmap(textAsBitmap("⭐", 40, Color.parseColor("#FFD700")));
 
         row1.addView(tv_username);
         row1.addView(iv_clean_icon);
@@ -297,7 +302,7 @@ class UserInfoFragmentNewExtraLayout {
         tvUserRegTime.setId(View.generateViewId());
 
         userLocateBt = new Button(context);
-        userLocateBt.setBackgroundColor(Color.TRANSPARENT); // 这句让Button没有背景板
+        userLocateBt.setBackgroundColor(Color.TRANSPARENT);
         userLocateBt.setTextSize(16f);
         userLocateBt.setTypeface(userLocateBt.getTypeface(), android.graphics.Typeface.BOLD);
         userLocateBt.setTextColor(Color.parseColor("#FF00FFA3"));
@@ -353,6 +358,36 @@ public class UserInfoFragmentNewHook {
     private ImageButton ibvClean;
     private ObjectAnimator rotateAnim;
     private final Handler handler = new Handler();
+
+    private void writeLocationToOtherPlugin(Context context, double latitude, double longitude, String nickname) {
+        try {
+            String otherPkg = "com.g.hnp";
+            String filename = "current_location.txt";
+            String content = "latitude: " + latitude + ", longitude: " + longitude + " " + nickname;
+            Context otherContext = context.createPackageContext(otherPkg, Context.CONTEXT_IGNORE_SECURITY | Context.CONTEXT_INCLUDE_CODE);
+            File file = new File(otherContext.getFilesDir(), filename);
+
+            boolean alreadyExists = false;
+            if (file.exists()) {
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.trim().equals(content)) {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+                reader.close();
+            }
+            if (!alreadyExists) {
+                FileWriter writer = new FileWriter(file, true);
+                writer.write(content + "\n");
+                writer.close();
+            }
+        } catch (Exception e) {
+            Log.e("UserInfoFragmentNewHook", "写入收藏定位异常: " + e);
+        }
+    }
 
     public void hookAnchorMonitorAddButton() {
         XposedHelpers.findAndHookMethod(TARGET_CLASS, classLoader, TARGET_METHOD,
@@ -416,45 +451,44 @@ public class UserInfoFragmentNewHook {
                             if (isHideLastDistance == 1) {
                                 userInfoFragmentNewExtra.userLocateBt.setVisibility(View.GONE);
                             }
-                            // ========== 定位按钮点击弹出地图 ==========
+
                             userInfoFragmentNewExtra.userLocateBt.setOnClickListener(v -> {
                                 UserInfoExtraAmapLayout amapLayout = new UserInfoExtraAmapLayout(fl_content.getContext());
-                                // 地图控件
                                 AMapHookHelper aMapHelper = new AMapHookHelper(fl_content.getContext(), fl_content.getContext().getClassLoader());
                                 View aMapView = aMapHelper.createMapView();
                                 amapLayout.ll_aMap.addView(aMapView);
 
                                 amapLayout.tv_username.setText(name);
 
-                                // 刷新按钮动画
+                                // 收藏按钮
                                 ibvClean = amapLayout.iv_clean_icon;
-                                rotateAnim = ObjectAnimator.ofFloat(ibvClean, "rotation", 0f, 360f);
-                                rotateAnim.setDuration(800);
-                                rotateAnim.setInterpolator(new LinearInterpolator());
-                                rotateAnim.setRepeatCount(ObjectAnimator.INFINITE);
                                 ibvClean.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        startRefreshAnimation();
-                                        handler.postDelayed(() -> {
-                                            aMapHelper.clearAllOverlays();
-                                            stopRefreshAnimation();
-                                        }, 500);
+                                        String latStr = amapLayout.tv_latitude.getText().toString();
+                                        String lngStr = amapLayout.tv_longitude.getText().toString();
+                                        double lat = 0, lng = 0;
+                                        try {
+                                            if (latStr.contains("："))
+                                                lat = Double.parseDouble(latStr.substring(latStr.indexOf("：") + 1).trim());
+                                            if (lngStr.contains("："))
+                                                lng = Double.parseDouble(lngStr.substring(lngStr.indexOf("：") + 1).trim());
+                                        } catch (Throwable ignore) {}
+                                        String nickname = amapLayout.tv_username.getText().toString();
+                                        writeLocationToOtherPlugin(fl_content.getContext(), lat, lng, nickname);
+                                        Toast.makeText(fl_content.getContext(), "已收藏坐标到独立插件", Toast.LENGTH_SHORT).show();
                                     }
                                 });
 
-                                // 设置经纬度、地理位置文本
                                 String location = (String) XposedHelpers.getObjectField(userInfoEntity, "location");
                                 amapLayout.tv_location.setText("真实位置(距离)：" + location);
                                 amapLayout.tv_user_with_self_distance.setVisibility(View.GONE);
 
-                                // 启动地图
                                 aMapHelper.onCreate(null);
                                 aMapHelper.onResume();
                                 aMapHelper.moveCamera(initialLat, initialLng, 5f);
                                 aMapHelper.addMarker(initialLat, initialLng, "天安门");
 
-                                // 自动定位追踪
                                 amapLayout.tv_auto_location.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
@@ -541,7 +575,6 @@ public class UserInfoFragmentNewHook {
                                     }
                                 });
 
-                                // 地图点击
                                 aMapHelper.setOnMapClickListener((lat, lng) -> {
                                     aMapHelper.addMarker(lat, lng, "纬度：" + lat + "\n经度：" + lng);
                                     amapLayout.tv_latitude.setText("纬度：" + lat);
@@ -589,7 +622,6 @@ public class UserInfoFragmentNewHook {
                                             });
                                 });
 
-                                // 弹窗展示
                                 CustomPopupWindow aMapPopupWindow = new CustomPopupWindow((Activity) fl_content.getContext(), amapLayout.root, Color.parseColor("#FF0A121F"));
                                 aMapPopupWindow.setAnimationStyle(android.R.style.Animation_Dialog);
                                 aMapPopupWindow.showAtCenter();
@@ -599,7 +631,6 @@ public class UserInfoFragmentNewHook {
                                 });
                             });
 
-                            // 注册时间处理
                             String registrationTimeEncrypt = (String) XposedHelpers.getObjectField(userInfoEntity, "registration_time_encrypt");
                             String registrationTime = ModuleTools.AesDecrypt(registrationTimeEncrypt);
                             if (!registrationTime.isEmpty()) {
@@ -612,29 +643,6 @@ public class UserInfoFragmentNewHook {
                             } else {
                                 userInfoFragmentNewExtra.tvUserRegTime.setVisibility(View.GONE);
                             }
-                        }
-                    }
-
-                    private void startRefreshAnimation() {
-                        if (rotateAnim != null && ibvClean != null) {
-                            rotateAnim.start();
-                            ibvClean.animate()
-                                    .scaleX(0.9f)
-                                    .scaleY(0.9f)
-                                    .setDuration(200)
-                                    .start();
-                        }
-                    }
-
-                    private void stopRefreshAnimation() {
-                        if (rotateAnim != null && ibvClean != null) {
-                            rotateAnim.cancel();
-                            ibvClean.setRotation(0f);
-                            ibvClean.animate()
-                                    .scaleX(1f)
-                                    .scaleY(1f)
-                                    .setDuration(200)
-                                    .start();
                         }
                     }
                 });
