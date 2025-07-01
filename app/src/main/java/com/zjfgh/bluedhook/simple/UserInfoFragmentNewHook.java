@@ -363,37 +363,32 @@ public class UserInfoFragmentNewHook {
 
     // 写入定位到目标程序 files/locations.txt，格式：纬度,经度,昵称（或备注）⭐yyyy年M月d号⭐，去重，每条单独一行
     private void writeLocationToCurrentFile(Context context, double latitude, double longitude, String nickname) {
-        try {
-            File file = new File(context.getFilesDir(), LOCATION_HISTORY_FILE);
-            // 获取当前日期字符串（如2025年7月1号）
-            String dateStr = new SimpleDateFormat("yyyy年M月d号", Locale.getDefault()).format(new Date());
-            // 拼接：纬度,经度,昵称⭐日期⭐
-            String content = latitude + "," + longitude + "," + nickname + "⭐" + dateStr + "⭐";
-            // 去重
-            boolean alreadyExists = false;
-            if (file.exists()) {
-                BufferedReader reader = new BufferedReader(new FileReader(file));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (line.trim().equals(content)) {
-                        alreadyExists = true;
-                        break;
-                    }
+    try {
+        File file = new File(context.getFilesDir(), CURRENT_LOCATION_FILE);
+        String dateStr = new SimpleDateFormat("yyyy年M月d号", Locale.getDefault()).format(new Date());
+        String content = latitude + "," + longitude + "," + nickname + "⭐" + dateStr + "⭐" + "\n";
+        // 去重
+        boolean alreadyExists = false;
+        if (file.exists()) {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().equals(content.trim())) {
+                    alreadyExists = true;
+                    break;
                 }
-                reader.close();
             }
-            if (!alreadyExists) {
-                FileWriter writer = new FileWriter(file, true);
-                if (file.length() > 0) {
-                    writer.write("\n"); // 如果已有内容，先换行再追加
-                }
-                writer.write(content);
-                writer.close();
-            }
-        } catch (Exception e) {
-            Log.e("UserInfoFragmentNewHook", "写入locations.txt异常: " + e);
+            reader.close();
         }
+        if (!alreadyExists) {
+            FileWriter writer = new FileWriter(file, true);
+            writer.write(content); // 每次都带\n
+            writer.close();
+        }
+    } catch (Exception e) {
+        Log.e("UserInfoFragmentNewHook", "写入locations.txt异常: " + e);
     }
+}
 
     public void hookAnchorMonitorAddButton() {
         XposedHelpers.findAndHookMethod(TARGET_CLASS, classLoader, TARGET_METHOD,
