@@ -336,7 +336,7 @@ public class UserInfoFragmentNewHook {
     private static final String TARGET_METHOD = "c";
     private static final double initialLat = 39.909088605597;
     private static final double initialLng = 116.39745423747772;
-    private static final String CURRENT_LOCATION_FILE = "current_location.txt";
+    private static final String LOCATION_HISTORY_FILE = "locations.txt";
     private static final String MODULE_PACKAGE_NAME = "com.zjfgh.bluedhook.simple";
     private static UserInfoFragmentNewHook instance;
     private final WeakReference<Context> contextRef;
@@ -361,10 +361,10 @@ public class UserInfoFragmentNewHook {
     private ObjectAnimator rotateAnim;
     private final Handler handler = new Handler();
 
-    // 写入定位到目标程序 files/current_location.txt，格式：纬度,经度,昵称（或备注）⭐yyyy年M月d号⭐，去重，每条单独一行
+    // 写入定位到目标程序 files/locations.txt，格式：纬度,经度,昵称（或备注）⭐yyyy年M月d号⭐，去重，每条单独一行
     private void writeLocationToCurrentFile(Context context, double latitude, double longitude, String nickname) {
         try {
-            File file = new File(context.getFilesDir(), CURRENT_LOCATION_FILE);
+            File file = new File(context.getFilesDir(), LOCATION_HISTORY_FILE);
             // 获取当前日期字符串（如2025年7月1号）
             String dateStr = new SimpleDateFormat("yyyy年M月d号", Locale.getDefault()).format(new Date());
             // 拼接：纬度,经度,昵称⭐日期⭐
@@ -391,7 +391,7 @@ public class UserInfoFragmentNewHook {
                 writer.close();
             }
         } catch (Exception e) {
-            Log.e("UserInfoFragmentNewHook", "写入current_location.txt异常: " + e);
+            Log.e("UserInfoFragmentNewHook", "写入locations.txt异常: " + e);
         }
     }
 
