@@ -335,6 +335,7 @@ public class UserInfoFragmentNewHook {
     private static final String TARGET_METHOD = "c";
     private static final double initialLat = 39.909088605597;
     private static final double initialLng = 116.39745423747772;
+    private static final String CURRENT_LOCATION_FILE = "current_location.txt";
     private static final String MODULE_PACKAGE_NAME = "com.zjfgh.bluedhook.simple";
     private static UserInfoFragmentNewHook instance;
     private final WeakReference<Context> contextRef;
@@ -359,14 +360,14 @@ public class UserInfoFragmentNewHook {
     private ObjectAnimator rotateAnim;
     private final Handler handler = new Handler();
 
-    private void writeLocationToOtherPlugin(Context context, double latitude, double longitude, String nickname) {
+    // 写入定位到目标程序 files/current_location.txt，昵称后加⭐，去重
+    private void writeLocationToCurrentFile(Context context, double latitude, double longitude, String nickname) {
         try {
-            String otherPkg = "com.g.hnp";
-            String filename = "current_location.txt";
-            String content = "latitude: " + latitude + ", longitude: " + longitude + " " + nickname;
-            Context otherContext = context.createPackageContext(otherPkg, Context.CONTEXT_IGNORE_SECURITY | Context.CONTEXT_INCLUDE_CODE);
-            File file = new File(otherContext.getFilesDir(), filename);
+            File file = new File(context.getFilesDir(), CURRENT_LOCATION_FILE);
+            // 昵称后加⭐
+            String content = "latitude: " + latitude + ", longitude: " + longitude + " " + nickname + "⭐";
 
+            // 检查是否已存在
             boolean alreadyExists = false;
             if (file.exists()) {
                 BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -385,7 +386,7 @@ public class UserInfoFragmentNewHook {
                 writer.close();
             }
         } catch (Exception e) {
-            Log.e("UserInfoFragmentNewHook", "写入收藏定位异常: " + e);
+            Log.e("UserInfoFragmentNewHook", "写入current_location.txt异常: " + e);
         }
     }
 
@@ -475,8 +476,8 @@ public class UserInfoFragmentNewHook {
                                                 lng = Double.parseDouble(lngStr.substring(lngStr.indexOf("：") + 1).trim());
                                         } catch (Throwable ignore) {}
                                         String nickname = amapLayout.tv_username.getText().toString();
-                                        writeLocationToOtherPlugin(fl_content.getContext(), lat, lng, nickname);
-                                        Toast.makeText(fl_content.getContext(), "已收藏坐标到独立插件", Toast.LENGTH_SHORT).show();
+                                        writeLocationToCurrentFile(fl_content.getContext(), lat, lng, nickname);
+                                        Toast.makeText(fl_content.getContext(), "已收藏坐标", Toast.LENGTH_SHORT).show();
                                     }
                                 });
 
