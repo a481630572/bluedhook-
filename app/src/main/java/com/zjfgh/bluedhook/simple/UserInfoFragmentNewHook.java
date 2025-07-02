@@ -289,7 +289,7 @@ class UserInfoFragmentNewExtraLayout {
         tvUserRegTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         tvUserRegTime.setTypeface(tvUserRegTime.getTypeface(), android.graphics.Typeface.BOLD);
         tvUserRegTime.setTextColor(Color.parseColor("#FF00FFA3"));
-        tvUserRegTime.setPadding(dp2px(context, 20), dp2px(context, 4), dp2px(context, 20), dp2px(context, 4));
+        tvUserRegTime.setPadding(dp2px(context, 20), dp2px(context, 4), dp2px(context, 10), dp2px(context, 4));
         tvUserRegTime.setMinWidth(0);
         tvUserRegTime.setMinHeight(0);
         tvUserRegTime.setIncludeFontPadding(false);
@@ -297,20 +297,24 @@ class UserInfoFragmentNewExtraLayout {
         tvUserRegTime.setLetterSpacing(0.05f);
         tvUserRegTime.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
         tvUserRegTime.setId(View.generateViewId());
+        tvUserRegTime.setSingleLine(true);
+        tvUserRegTime.setEllipsize(TextUtils.TruncateAt.END);
 
         // 新增上线时间 TextView
         tvLastOperateAnchor = new TextView(context);
         tvLastOperateAnchor.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         tvLastOperateAnchor.setTypeface(tvLastOperateAnchor.getTypeface(), android.graphics.Typeface.BOLD);
         tvLastOperateAnchor.setTextColor(Color.parseColor("#FF00FFA3"));
-        tvLastOperateAnchor.setPadding(dp2px(context, 8), dp2px(context, 4), dp2px(context, 8), dp2px(context, 4));
+        tvLastOperateAnchor.setPadding(dp2px(context, 8), dp2px(context, 4), dp2px(context, 10), dp2px(context, 4));
         tvLastOperateAnchor.setMinWidth(0);
         tvLastOperateAnchor.setMinHeight(0);
         tvLastOperateAnchor.setIncludeFontPadding(false);
-        tvLastOperateAnchor.setText("(上线时间：--)");
+        tvLastOperateAnchor.setText("上线：--");
         tvLastOperateAnchor.setLetterSpacing(0.05f);
         tvLastOperateAnchor.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
         tvLastOperateAnchor.setId(View.generateViewId());
+        tvLastOperateAnchor.setSingleLine(true);
+        tvLastOperateAnchor.setEllipsize(TextUtils.TruncateAt.END);
 
         // 设置TextView权重为2
         LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
@@ -318,7 +322,7 @@ class UserInfoFragmentNewExtraLayout {
             LinearLayout.LayoutParams.WRAP_CONTENT,
             2f // 权重2
         );
-        tvParams.setMarginEnd(dp2px(context, 10));
+        tvParams.setMarginEnd(dp2px(context, 0));
         tvUserRegTime.setLayoutParams(tvParams);
 
         // 上线时间权重为1
@@ -327,7 +331,7 @@ class UserInfoFragmentNewExtraLayout {
             LinearLayout.LayoutParams.WRAP_CONTENT,
             1f
         );
-        onlineParams.setMarginEnd(dp2px(context, 10));
+        onlineParams.setMarginEnd(dp2px(context, 0));
         tvLastOperateAnchor.setLayoutParams(onlineParams);
 
         userLocateBt = new Button(context);
@@ -683,11 +687,10 @@ public class UserInfoFragmentNewHook {
                                 userInfoFragmentNewExtra.tvUserRegTime.setVisibility(View.GONE);
                             }
 
-                            // ====== 上线时间功能追加 ======
-                            // 只为主播且隐藏上线时显示
+                            // ====== 上线时间功能优化 ======
                             if (isHideLastOperate == 1 && isAnchor == 1) {
                                 userInfoFragmentNewExtra.tvLastOperateAnchor.setVisibility(View.VISIBLE);
-                                // 异步获取上线时间
+                                // 异步获取上线时间，精简前缀
                                 NetworkManager.getInstance().getAsync(
                                         NetworkManager.getBluedLiveSearchAnchorApi(name),
                                         AuthManager.auHook(false, classLoader, fl_content.getContext()),
@@ -695,7 +698,7 @@ public class UserInfoFragmentNewHook {
                                             @Override
                                             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                                                 userInfoFragmentNewExtra.tvLastOperateAnchor.post(() ->
-                                                    userInfoFragmentNewExtra.tvLastOperateAnchor.setText("(上线时间获取失败)")
+                                                    userInfoFragmentNewExtra.tvLastOperateAnchor.setText("上线获取失败")
                                                 );
                                             }
                                             @Override
@@ -712,14 +715,14 @@ public class UserInfoFragmentNewHook {
                                                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                                                                 String date = sdf.format(new Date(lastOperate * 1000L));
                                                                 userInfoFragmentNewExtra.tvLastOperateAnchor.post(() ->
-                                                                    userInfoFragmentNewExtra.tvLastOperateAnchor.setText("(上线时间：" + date + ")")
+                                                                    userInfoFragmentNewExtra.tvLastOperateAnchor.setText("上线：" + date)
                                                                 );
                                                             }
                                                         }
                                                     }
                                                 } catch (JSONException | IOException e) {
                                                     userInfoFragmentNewExtra.tvLastOperateAnchor.post(() ->
-                                                        userInfoFragmentNewExtra.tvLastOperateAnchor.setText("(上线时间获取异常)")
+                                                        userInfoFragmentNewExtra.tvLastOperateAnchor.setText("上线获取异常")
                                                     );
                                                     Log.e("UserInfoFragmentNewHook", "JSONException" + e);
                                                 }
