@@ -269,27 +269,28 @@ class UserInfoFragmentNewExtraLayout {
 
     public UserInfoFragmentNewExtraLayout(Context context) {
         root = new LinearLayout(context);
-        root.setOrientation(LinearLayout.HORIZONTAL);
+        root.setOrientation(LinearLayout.VERTICAL);
         root.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         ));
 
-        LinearLayout inner = new LinearLayout(context);
-        inner.setOrientation(LinearLayout.HORIZONTAL);
+        // 第一行：注册时间
+        LinearLayout row1 = new LinearLayout(context);
+        row1.setOrientation(LinearLayout.HORIZONTAL);
         int paddingPx = dp2px(context, 10);
-        inner.setPadding(paddingPx, paddingPx, paddingPx, paddingPx);
-        inner.setLayoutParams(new LinearLayout.LayoutParams(
+        row1.setPadding(paddingPx, paddingPx, paddingPx, paddingPx);
+        row1.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         ));
-        inner.setId(View.generateViewId());
+        row1.setId(View.generateViewId());
 
         tvUserRegTime = new TextView(context);
         tvUserRegTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         tvUserRegTime.setTypeface(tvUserRegTime.getTypeface(), android.graphics.Typeface.BOLD);
         tvUserRegTime.setTextColor(Color.parseColor("#FF00FFA3"));
-        tvUserRegTime.setPadding(dp2px(context, 20), dp2px(context, 4), dp2px(context, 10), dp2px(context, 4));
+        tvUserRegTime.setPadding(0, 0, dp2px(context, 10), 0);
         tvUserRegTime.setMinWidth(0);
         tvUserRegTime.setMinHeight(0);
         tvUserRegTime.setIncludeFontPadding(false);
@@ -300,46 +301,20 @@ class UserInfoFragmentNewExtraLayout {
         tvUserRegTime.setSingleLine(true);
         tvUserRegTime.setEllipsize(TextUtils.TruncateAt.END);
 
-        // 新增上线时间 TextView
-        tvLastOperateAnchor = new TextView(context);
-        tvLastOperateAnchor.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        tvLastOperateAnchor.setTypeface(tvLastOperateAnchor.getTypeface(), android.graphics.Typeface.BOLD);
-        tvLastOperateAnchor.setTextColor(Color.parseColor("#FF00FFA3"));
-        tvLastOperateAnchor.setPadding(dp2px(context, 8), dp2px(context, 4), dp2px(context, 10), dp2px(context, 4));
-        tvLastOperateAnchor.setMinWidth(0);
-        tvLastOperateAnchor.setMinHeight(0);
-        tvLastOperateAnchor.setIncludeFontPadding(false);
-        tvLastOperateAnchor.setText("上线：--");
-        tvLastOperateAnchor.setLetterSpacing(0.05f);
-        tvLastOperateAnchor.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
-        tvLastOperateAnchor.setId(View.generateViewId());
-        tvLastOperateAnchor.setSingleLine(true);
-        tvLastOperateAnchor.setEllipsize(TextUtils.TruncateAt.END);
-
-        // 设置TextView权重为2
+        // 占位用权重
         LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
             0,
             LinearLayout.LayoutParams.WRAP_CONTENT,
-            2f // 权重2
+            2f
         );
-        tvParams.setMarginEnd(dp2px(context, 0));
         tvUserRegTime.setLayoutParams(tvParams);
-
-        // 上线时间权重为1
-        LinearLayout.LayoutParams onlineParams = new LinearLayout.LayoutParams(
-            0,
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            1f
-        );
-        onlineParams.setMarginEnd(dp2px(context, 0));
-        tvLastOperateAnchor.setLayoutParams(onlineParams);
 
         userLocateBt = new Button(context);
         userLocateBt.setBackgroundColor(Color.TRANSPARENT);
         userLocateBt.setTextSize(14f);
         userLocateBt.setTypeface(userLocateBt.getTypeface(), android.graphics.Typeface.BOLD);
         userLocateBt.setTextColor(Color.parseColor("#FF00FFA3"));
-        userLocateBt.setPadding(dp2px(context, 10), dp2px(context, 4), dp2px(context, 10), dp2px(context, 4));
+        userLocateBt.setPadding(dp2px(context, 10), 0, dp2px(context, 10), 0);
         userLocateBt.setSingleLine(true);
         userLocateBt.setEllipsize(TextUtils.TruncateAt.END);
         userLocateBt.setMaxWidth(dp2px(context, 100));
@@ -351,18 +326,51 @@ class UserInfoFragmentNewExtraLayout {
         userLocateBt.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
         userLocateBt.setId(View.generateViewId());
 
-        // 设置Button权重为1
         LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
             0,
             LinearLayout.LayoutParams.WRAP_CONTENT,
-            1f // 权重1
+            1f
         );
         userLocateBt.setLayoutParams(btnParams);
 
-        inner.addView(tvUserRegTime);
-        inner.addView(tvLastOperateAnchor);
-        inner.addView(userLocateBt);
-        root.addView(inner);
+        row1.addView(tvUserRegTime);
+        row1.addView(userLocateBt);
+
+        // 第二行：上线时间
+        LinearLayout row2 = new LinearLayout(context);
+        row2.setOrientation(LinearLayout.HORIZONTAL);
+        row2.setPadding(paddingPx, 0, paddingPx, paddingPx);
+        row2.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+        row2.setId(View.generateViewId());
+
+        tvLastOperateAnchor = new TextView(context);
+        tvLastOperateAnchor.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        tvLastOperateAnchor.setTypeface(tvLastOperateAnchor.getTypeface(), android.graphics.Typeface.BOLD);
+        tvLastOperateAnchor.setTextColor(Color.parseColor("#FF00FFA3"));
+        tvLastOperateAnchor.setPadding(0, 0, 0, 0);
+        tvLastOperateAnchor.setMinWidth(0);
+        tvLastOperateAnchor.setMinHeight(0);
+        tvLastOperateAnchor.setIncludeFontPadding(false);
+        tvLastOperateAnchor.setText(""); // 默认不显示
+        tvLastOperateAnchor.setLetterSpacing(0.05f);
+        tvLastOperateAnchor.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
+        tvLastOperateAnchor.setId(View.generateViewId());
+        tvLastOperateAnchor.setSingleLine(false); // 允许自动换行
+        tvLastOperateAnchor.setEllipsize(null);
+
+        LinearLayout.LayoutParams onlineParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        tvLastOperateAnchor.setLayoutParams(onlineParams);
+
+        row2.addView(tvLastOperateAnchor);
+
+        root.addView(row1);
+        root.addView(row2);
     }
 
     private int dp2px(Context context, float dp) {
@@ -688,17 +696,18 @@ public class UserInfoFragmentNewHook {
                             }
 
                             // ====== 上线时间功能优化 ======
+                            // 只为主播且隐藏上线时显示
                             if (isHideLastOperate == 1 && isAnchor == 1) {
-                                userInfoFragmentNewExtra.tvLastOperateAnchor.setVisibility(View.VISIBLE);
-                                // 异步获取上线时间，精简前缀
+                                userInfoFragmentNewExtra.tvLastOperateAnchor.setText(""); // 先清空
                                 NetworkManager.getInstance().getAsync(
                                         NetworkManager.getBluedLiveSearchAnchorApi(name),
                                         AuthManager.auHook(false, classLoader, fl_content.getContext()),
                                         new Callback() {
                                             @Override
                                             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                                                // 失败时不显示任何内容
                                                 userInfoFragmentNewExtra.tvLastOperateAnchor.post(() ->
-                                                    userInfoFragmentNewExtra.tvLastOperateAnchor.setText("上线获取失败")
+                                                    userInfoFragmentNewExtra.tvLastOperateAnchor.setText("")
                                                 );
                                             }
                                             @Override
@@ -707,22 +716,34 @@ public class UserInfoFragmentNewHook {
                                                     if (response.code() == 200 && response.body() != null && !response.body().toString().isEmpty()) {
                                                         JSONObject jsonResponse = new JSONObject(response.body().string());
                                                         JSONArray usersArray = jsonResponse.getJSONArray("data");
+                                                        boolean found = false;
                                                         for (int i = 0; i < usersArray.length(); i++) {
                                                             JSONObject user = usersArray.getJSONObject(i);
-                                                            long lastOperate = user.getLong("last_operate");
+                                                            long lastOperate = user.optLong("last_operate", 0);
                                                             int anchorUid = user.getInt("uid");
-                                                            if (String.valueOf(anchorUid).equals(uid)) {
+                                                            if (String.valueOf(anchorUid).equals(uid) && lastOperate > 0) {
                                                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                                                                 String date = sdf.format(new Date(lastOperate * 1000L));
                                                                 userInfoFragmentNewExtra.tvLastOperateAnchor.post(() ->
                                                                     userInfoFragmentNewExtra.tvLastOperateAnchor.setText("上线：" + date)
                                                                 );
+                                                                found = true;
+                                                                break;
                                                             }
                                                         }
+                                                        if (!found) {
+                                                            userInfoFragmentNewExtra.tvLastOperateAnchor.post(() ->
+                                                                userInfoFragmentNewExtra.tvLastOperateAnchor.setText("")
+                                                            );
+                                                        }
+                                                    } else {
+                                                        userInfoFragmentNewExtra.tvLastOperateAnchor.post(() ->
+                                                            userInfoFragmentNewExtra.tvLastOperateAnchor.setText("")
+                                                        );
                                                     }
                                                 } catch (JSONException | IOException e) {
                                                     userInfoFragmentNewExtra.tvLastOperateAnchor.post(() ->
-                                                        userInfoFragmentNewExtra.tvLastOperateAnchor.setText("上线获取异常")
+                                                        userInfoFragmentNewExtra.tvLastOperateAnchor.setText("")
                                                     );
                                                     Log.e("UserInfoFragmentNewHook", "JSONException" + e);
                                                 }
@@ -730,7 +751,7 @@ public class UserInfoFragmentNewHook {
                                         }
                                 );
                             } else {
-                                userInfoFragmentNewExtra.tvLastOperateAnchor.setVisibility(View.GONE);
+                                userInfoFragmentNewExtra.tvLastOperateAnchor.setText("");
                             }
                         }
                     }
