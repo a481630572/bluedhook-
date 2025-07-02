@@ -265,6 +265,7 @@ class UserInfoFragmentNewExtraLayout {
     public LinearLayout root;
     public TextView tvUserRegTime;
     public Button userLocateBt;
+    public TextView tvLastOperateAnchor; // 新增上线时间
 
     public UserInfoFragmentNewExtraLayout(Context context) {
         root = new LinearLayout(context);
@@ -297,6 +298,20 @@ class UserInfoFragmentNewExtraLayout {
         tvUserRegTime.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
         tvUserRegTime.setId(View.generateViewId());
 
+        // 新增上线时间 TextView
+        tvLastOperateAnchor = new TextView(context);
+        tvLastOperateAnchor.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        tvLastOperateAnchor.setTypeface(tvLastOperateAnchor.getTypeface(), android.graphics.Typeface.BOLD);
+        tvLastOperateAnchor.setTextColor(Color.parseColor("#FF00FFA3"));
+        tvLastOperateAnchor.setPadding(dp2px(context, 8), dp2px(context, 4), dp2px(context, 8), dp2px(context, 4));
+        tvLastOperateAnchor.setMinWidth(0);
+        tvLastOperateAnchor.setMinHeight(0);
+        tvLastOperateAnchor.setIncludeFontPadding(false);
+        tvLastOperateAnchor.setText("(上线时间：--)");
+        tvLastOperateAnchor.setLetterSpacing(0.05f);
+        tvLastOperateAnchor.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
+        tvLastOperateAnchor.setId(View.generateViewId());
+
         // 设置TextView权重为2
         LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
             0,
@@ -306,16 +321,25 @@ class UserInfoFragmentNewExtraLayout {
         tvParams.setMarginEnd(dp2px(context, 10));
         tvUserRegTime.setLayoutParams(tvParams);
 
+        // 上线时间权重为1
+        LinearLayout.LayoutParams onlineParams = new LinearLayout.LayoutParams(
+            0,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            1f
+        );
+        onlineParams.setMarginEnd(dp2px(context, 10));
+        tvLastOperateAnchor.setLayoutParams(onlineParams);
+
         userLocateBt = new Button(context);
         userLocateBt.setBackgroundColor(Color.TRANSPARENT);
-        userLocateBt.setTextSize(14f); // 字体略减小
+        userLocateBt.setTextSize(14f);
         userLocateBt.setTypeface(userLocateBt.getTypeface(), android.graphics.Typeface.BOLD);
         userLocateBt.setTextColor(Color.parseColor("#FF00FFA3"));
         userLocateBt.setPadding(dp2px(context, 10), dp2px(context, 4), dp2px(context, 10), dp2px(context, 4));
         userLocateBt.setSingleLine(true);
         userLocateBt.setEllipsize(TextUtils.TruncateAt.END);
-        userLocateBt.setMaxWidth(dp2px(context, 100)); // 最大宽100dp
-        userLocateBt.setMinWidth(dp2px(context, 50));  // 最小宽50dp
+        userLocateBt.setMaxWidth(dp2px(context, 100));
+        userLocateBt.setMinWidth(dp2px(context, 50));
         userLocateBt.setMaxLines(1);
         userLocateBt.setIncludeFontPadding(false);
         userLocateBt.setText("定位追踪");
@@ -332,6 +356,7 @@ class UserInfoFragmentNewExtraLayout {
         userLocateBt.setLayoutParams(btnParams);
 
         inner.addView(tvUserRegTime);
+        inner.addView(tvLastOperateAnchor);
         inner.addView(userLocateBt);
         root.addView(inner);
     }
@@ -375,32 +400,32 @@ public class UserInfoFragmentNewHook {
 
     // 写入定位到目标程序 files/locations.txt，格式：纬度,经度,昵称（或备注）⭐yyyy年M月d号⭐，去重，每条单独一行
     private void writeLocationToCurrentFile(Context context, double latitude, double longitude, String nickname) {
-    try {
-        File file = new File(context.getFilesDir(), LOCATION_HISTORY_FILE);
-        String dateStr = new SimpleDateFormat("yyyy年M月d号", Locale.getDefault()).format(new Date());
-        String content = latitude + "," + longitude + "," + nickname + "⭐" + dateStr + "⭐" + "\n";
-        // 去重
-        boolean alreadyExists = false;
-        if (file.exists()) {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.trim().equals(content.trim())) {
-                    alreadyExists = true;
-                    break;
+        try {
+            File file = new File(context.getFilesDir(), LOCATION_HISTORY_FILE);
+            String dateStr = new SimpleDateFormat("yyyy年M月d号", Locale.getDefault()).format(new Date());
+            String content = latitude + "," + longitude + "," + nickname + "⭐" + dateStr + "⭐" + "\n";
+            // 去重
+            boolean alreadyExists = false;
+            if (file.exists()) {
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.trim().equals(content.trim())) {
+                        alreadyExists = true;
+                        break;
+                    }
                 }
+                reader.close();
             }
-            reader.close();
+            if (!alreadyExists) {
+                FileWriter writer = new FileWriter(file, true);
+                writer.write(content); // 每次都带\n
+                writer.close();
+            }
+        } catch (Exception e) {
+            Log.e("UserInfoFragmentNewHook", "写入locations.txt异常: " + e);
         }
-        if (!alreadyExists) {
-            FileWriter writer = new FileWriter(file, true);
-            writer.write(content); // 每次都带\n
-            writer.close();
-        }
-    } catch (Exception e) {
-        Log.e("UserInfoFragmentNewHook", "写入locations.txt异常: " + e);
     }
-}
 
     public void hookAnchorMonitorAddButton() {
         XposedHelpers.findAndHookMethod(TARGET_CLASS, classLoader, TARGET_METHOD,
@@ -644,6 +669,7 @@ public class UserInfoFragmentNewHook {
                                 });
                             });
 
+                            // 注册时间
                             String registrationTimeEncrypt = (String) XposedHelpers.getObjectField(userInfoEntity, "registration_time_encrypt");
                             String registrationTime = ModuleTools.AesDecrypt(registrationTimeEncrypt);
                             if (!registrationTime.isEmpty()) {
@@ -655,6 +681,53 @@ public class UserInfoFragmentNewHook {
                                 userInfoFragmentNewExtra.tvUserRegTime.setVisibility(View.VISIBLE);
                             } else {
                                 userInfoFragmentNewExtra.tvUserRegTime.setVisibility(View.GONE);
+                            }
+
+                            // ====== 上线时间功能追加 ======
+                            // 只为主播且隐藏上线时显示
+                            if (isHideLastOperate == 1 && isAnchor == 1) {
+                                userInfoFragmentNewExtra.tvLastOperateAnchor.setVisibility(View.VISIBLE);
+                                // 异步获取上线时间
+                                NetworkManager.getInstance().getAsync(
+                                        NetworkManager.getBluedLiveSearchAnchorApi(name),
+                                        AuthManager.auHook(false, classLoader, fl_content.getContext()),
+                                        new Callback() {
+                                            @Override
+                                            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                                                userInfoFragmentNewExtra.tvLastOperateAnchor.post(() ->
+                                                    userInfoFragmentNewExtra.tvLastOperateAnchor.setText("(上线时间获取失败)")
+                                                );
+                                            }
+                                            @Override
+                                            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                                                try {
+                                                    if (response.code() == 200 && response.body() != null && !response.body().toString().isEmpty()) {
+                                                        JSONObject jsonResponse = new JSONObject(response.body().string());
+                                                        JSONArray usersArray = jsonResponse.getJSONArray("data");
+                                                        for (int i = 0; i < usersArray.length(); i++) {
+                                                            JSONObject user = usersArray.getJSONObject(i);
+                                                            long lastOperate = user.getLong("last_operate");
+                                                            int anchorUid = user.getInt("uid");
+                                                            if (String.valueOf(anchorUid).equals(uid)) {
+                                                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                                                                String date = sdf.format(new Date(lastOperate * 1000L));
+                                                                userInfoFragmentNewExtra.tvLastOperateAnchor.post(() ->
+                                                                    userInfoFragmentNewExtra.tvLastOperateAnchor.setText("(上线时间：" + date + ")")
+                                                                );
+                                                            }
+                                                        }
+                                                    }
+                                                } catch (JSONException | IOException e) {
+                                                    userInfoFragmentNewExtra.tvLastOperateAnchor.post(() ->
+                                                        userInfoFragmentNewExtra.tvLastOperateAnchor.setText("(上线时间获取异常)")
+                                                    );
+                                                    Log.e("UserInfoFragmentNewHook", "JSONException" + e);
+                                                }
+                                            }
+                                        }
+                                );
+                            } else {
+                                userInfoFragmentNewExtra.tvLastOperateAnchor.setVisibility(View.GONE);
                             }
                         }
                     }
