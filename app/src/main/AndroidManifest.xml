@@ -17,7 +17,7 @@
             android:value="true" />
         <meta-data
             android:name="xposeddescription"
-            android:value="Blued模块By斌彬" />
+            android:value="定位追踪兼容版-原_By斌彬-改_li" />
         <meta-data
             android:name="xposedminversion"
             android:value="53" />
