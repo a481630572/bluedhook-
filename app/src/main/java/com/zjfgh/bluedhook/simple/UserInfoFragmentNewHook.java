@@ -65,6 +65,7 @@ class UserInfoExtraAmapLayout {
     public TextView tv_location;
     public TextView tv_user_with_self_distance;
     public TextView tv_auto_location;
+    public TextView tv_stop_location; // 新增
 
     public UserInfoExtraAmapLayout(Context context) {
         root = new LinearLayout(context);
@@ -231,9 +232,25 @@ class UserInfoExtraAmapLayout {
         tv_auto_location.setGravity(android.view.Gravity.CENTER);
         tv_auto_location.setId(View.generateViewId());
 
+        // 新增“停止追踪”按钮
+        tv_stop_location = new TextView(context);
+        tv_stop_location.setTextSize(16f);
+        tv_stop_location.setTextColor(Color.parseColor("#FF888888"));
+        tv_stop_location.setText("停止追踪");
+        tv_stop_location.setPadding(dp2px(context, 6), dp2px(context, 2), dp2px(context, 6), dp2px(context, 2));
+        LinearLayout.LayoutParams stopLocParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        stopLocParams.gravity = android.view.Gravity.CENTER_HORIZONTAL;
+        tv_stop_location.setLayoutParams(stopLocParams);
+        tv_stop_location.setGravity(android.view.Gravity.CENTER);
+        tv_stop_location.setId(View.generateViewId());
+        tv_stop_location.setVisibility(View.GONE);
+
         ll_location_root.addView(row1);
         ll_location_root.addView(row2);
         ll_location_root.addView(tv_auto_location);
+        ll_location_root.addView(tv_stop_location);
 
         frameLayout.addView(ll_aMap);
         frameLayout.addView(ll_location_root);
@@ -376,6 +393,25 @@ class UserInfoFragmentNewExtraLayout {
     private int dp2px(Context context, float dp) {
         return (int) (dp * context.getResources().getDisplayMetrics().density + 0.5f);
     }
+}
+
+
+// 你需要确保LocationTracker实现stopTracking方法
+public class LocationTracker {
+    private volatile boolean tracking = true;
+    // ... 你的成员变量和构造函数
+
+    public void startTracking(/*你的参数*/) {
+        tracking = true;
+        // 你的追踪实现，在每次循环或回调检查 tracking
+        // if (!tracking) return;
+    }
+
+    public void stopTracking() {
+        tracking = false;
+        // 其他清理逻辑（如终止线程、移除回调等）
+    }
+    // ... 其他方法
 }
 
 
@@ -539,6 +575,9 @@ public class UserInfoFragmentNewHook {
                                 aMapHelper.moveCamera(initialLat, initialLng, 5f);
                                 aMapHelper.addMarker(initialLat, initialLng, "天安门");
 
+                                // 用于追踪器的引用
+                                final LocationTracker[] trackerRef = new LocationTracker[1];
+
                                 amapLayout.tv_auto_location.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
@@ -547,6 +586,8 @@ public class UserInfoFragmentNewHook {
                                         } else {
                                             amapLayout.tv_auto_location.setText("自动追踪中...");
                                         }
+                                        amapLayout.tv_stop_location.setVisibility(View.VISIBLE); // 显示停止按钮
+
                                         NetworkManager.getInstance().getAsync(NetworkManager.getBluedSetUsersLocationApi(initialLat, initialLng),
                                                 AuthManager.auHook(false, classLoader, fl_content.getContext()), new Callback() {
                                                     @Override
@@ -576,7 +617,9 @@ public class UserInfoFragmentNewHook {
                                                                                             amapLayout.tv_user_with_self_distance.setText("当前虚拟距离：" + DistanceConverter.formatDistance(distanceKm));
                                                                                             amapLayout.tv_user_with_self_distance.setVisibility(View.VISIBLE);
                                                                                         });
+                                                                                        // -- 追踪器启动 --
                                                                                         LocationTracker tracker = new LocationTracker(aMapHelper, uid, classLoader, fl_content);
+                                                                                        trackerRef[0] = tracker;
                                                                                         tracker.startTracking(initialLat, initialLng, distanceKm, 15, new LocationTracker.LocationTrackingCallback() {
                                                                                             @Override public void onInitialLocation(double lat, double lng, double dKm) {}
                                                                                             @Override public void onProbeLocation(double lat, double lng) {}
@@ -597,6 +640,7 @@ public class UserInfoFragmentNewHook {
                                                                                                     amapLayout.tv_latitude.setText("经度：" + lat);
                                                                                                     amapLayout.tv_longitude.setText("纬度：" + lng);
                                                                                                     amapLayout.tv_auto_location.setText("追踪完成");
+                                                                                                    amapLayout.tv_stop_location.setVisibility(View.GONE); // 隐藏停止
                                                                                                 });
                                                                                             }
                                                                                             @NonNull
@@ -622,6 +666,20 @@ public class UserInfoFragmentNewHook {
                                                                 });
                                                     }
                                                 });
+                                    }
+                                });
+
+                                // 新增：停止追踪按钮逻辑
+                                amapLayout.tv_stop_location.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        if (trackerRef[0] != null) {
+                                            trackerRef[0].stopTracking();
+                                        }
+                                        amapLayout.tv_auto_location.setText("点我追踪位置");
+                                        amapLayout.tv_auto_location.setEnabled(true);
+                                        amapLayout.tv_stop_location.setVisibility(View.GONE);
+                                        Toast.makeText(fl_content.getContext(), "已停止追踪", Toast.LENGTH_SHORT).show();
                                     }
                                 });
 
@@ -678,6 +736,8 @@ public class UserInfoFragmentNewHook {
                                 aMapPopupWindow.setOnDismissListener(() -> {
                                     aMapHelper.onPause();
                                     aMapHelper.onDestroy();
+                                    // 关闭弹窗时也要停止追踪
+                                    if (trackerRef[0] != null) trackerRef[0].stopTracking();
                                 });
                             });
 
