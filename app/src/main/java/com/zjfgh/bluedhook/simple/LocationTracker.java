@@ -31,9 +31,8 @@ public class LocationTracker {
     private int maxIterations;
     private int noIntersectionAttempts = 0;
 
-    private volatile boolean tracking = true; // 新增：追踪标志
+    private volatile boolean tracking = true; // 追踪标志
 
-    // 构造函数
     public LocationTracker(AMapHookHelper aMapHelper, String uid, ClassLoader classLoader, View fl_content) {
         this.aMapHelper = aMapHelper;
         this.uid = uid;
@@ -52,25 +51,22 @@ public class LocationTracker {
         this.maxIterations = maxIterations;
         this.noIntersectionAttempts = 0; // Reset attempts counter
 
-        // 使用转换后的坐标
         aMapHelper.clearAllOverlays();
         aMapHelper.addMarker(initialLat, initialLng, "初始位置");
         drawCircle(initialLat, initialLng, initialDistanceKm);
 
-        // 通知回调转换后的坐标
         if (callback != null) {
             callback.onInitialLocation(initialLat, initialLng, initialDistanceKm);
         }
 
-        // 开始递归定位（传入转换后的坐标）
         locateTarget(initialLat, initialLng, initialDistanceKm, maxIterations, callback);
     }
 
     // 递归定位方法
     private void locateTarget(double centerLat, double centerLng, double radiusKm, int maxIterations, LocationTrackingCallback callback) {
-        if (!tracking) return; // 检查是否停止
+        if (!tracking) return;
 
-        if (radiusKm == 0 || maxIterations <= 0) { // 当距离小于1米时停止
+        if (radiusKm == 0 || maxIterations <= 0) {
             aMapHelper.addMarker(centerLat, centerLng, "最终位置");
             if (callback != null) {
                 callback.onFinalLocation(centerLat, centerLng, radiusKm);
@@ -78,7 +74,6 @@ public class LocationTracker {
             return;
         }
 
-        // 计算向右偏移radiusKm个单位的坐标
         double offsetLat = centerLat;
         double offsetLng = centerLng + kmToDegrees(radiusKm, centerLat);
 
@@ -91,7 +86,7 @@ public class LocationTracker {
         getDistanceFromServer(offsetLat, offsetLng, new DistanceCallback() {
             @Override
             public void onDistanceReceived(double newDistanceKm) {
-                if (!tracking) return; // 检查是否停止
+                if (!tracking) return;
 
                 if (callback != null) {
                     callback.onProbeDistance(newDistanceKm);
@@ -140,7 +135,7 @@ public class LocationTracker {
     private void evaluateIntersections(List<LatLng> intersections, int index,
                                        List<LatLng> validPoints, double minDistance,
                                        LatLng bestPoint, LocationTrackingCallback callback) {
-        if (!tracking) return; // 检查是否停止
+        if (!tracking) return;
 
         if (index >= intersections.size()) {
             if (bestPoint != null) {
@@ -148,7 +143,7 @@ public class LocationTracker {
                 getDistanceFromServer(bestPoint.latitude, bestPoint.longitude, new DistanceCallback() {
                     @Override
                     public void onDistanceReceived(double distanceKm) {
-                        if (!tracking) return; // 检查是否停止
+                        if (!tracking) return;
                         if (callback != null) {
                             callback.onNewCenterLocation(bestPoint.latitude, bestPoint.longitude, distanceKm);
                         }
@@ -165,7 +160,7 @@ public class LocationTracker {
             @SuppressLint("DefaultLocale")
             @Override
             public void onDistanceReceived(double distanceKm) {
-                if (!tracking) return; // 检查是否停止
+                if (!tracking) return;
 
                 aMapHelper.addMarker(point.latitude, point.longitude,
                         String.format("交点距离:%.3fkm", distanceKm));
@@ -186,26 +181,24 @@ public class LocationTracker {
 
     // 从服务器获取距离
     private void getDistanceFromServer(double lat, double lng, DistanceCallback callback) {
-        if (!tracking) return; // 检查是否停止
+        if (!tracking) return;
         NetworkManager.getInstance().getAsync(
                 NetworkManager.getBluedSetUsersLocationApi(lat, lng),
                 AuthManager.auHook(false, classLoader, fl_content.getContext()),
                 new Callback() {
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        if (!tracking) return; // 检查是否停止
+                        if (!tracking) return;
                         NetworkManager.getInstance().getAsync(
                                 NetworkManager.getBluedUserBasicAPI(uid),
                                 AuthManager.auHook(false, classLoader, fl_content.getContext()),
                                 new Callback() {
                                     @Override
-                                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                                        // 处理错误
-                                    }
+                                    public void onFailure(@NonNull Call call, @NonNull IOException e) {}
 
                                     @Override
                                     public void onResponse(@NonNull Call call, @NonNull Response response) {
-                                        if (!tracking) return; // 检查是否停止
+                                        if (!tracking) return;
                                         try {
                                             if (response.code() == 200) {
                                                 assert response.body() != null;
@@ -221,17 +214,13 @@ public class LocationTracker {
                                                     }
                                                 }
                                             }
-                                        } catch (Exception e) {
-                                            // 处理异常
-                                        }
+                                        } catch (Exception e) {}
                                     }
                                 });
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        // 处理错误
-                    }
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {}
                 });
     }
 
@@ -248,12 +237,12 @@ public class LocationTracker {
         GeodeticCalculator geoCalc = new GeodeticCalculator();
         Ellipsoid reference = Ellipsoid.WGS84;
 
-        GlobalPosition p1 = new GlobalPosition(lat1, lng1, 0); // 高度设为0
+        GlobalPosition p1 = new GlobalPosition(lat1, lng1, 0);
         GlobalPosition p2 = new GlobalPosition(lat2, lng2, 0);
 
         try {
             GeodeticMeasurement results = geoCalc.calculateGeodeticMeasurement(reference, p1, p2);
-            double distance = results.getPointToPointDistance() / 1000; // 转为km
+            double distance = results.getPointToPointDistance() / 1000;
             double azimuth = results.getAzimuth();
 
             if (distance > r1 + r2 || distance < Math.abs(r1 - r2)) {
@@ -303,11 +292,8 @@ public class LocationTracker {
 
         void onFinalLocation(double lat, double lng, double distanceKm);
 
-        default void onNoIntersection(double newLat, double newLng, double currentRadius, int attempt) {
-        }
-
-        default void onError(String message) {
-        }
+        default void onNoIntersection(double newLat, double newLng, double currentRadius, int attempt) {}
+        default void onError(String message) {}
     }
 
     interface DistanceCallback {
