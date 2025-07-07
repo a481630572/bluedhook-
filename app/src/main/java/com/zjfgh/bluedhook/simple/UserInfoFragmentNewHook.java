@@ -11,10 +11,8 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -375,7 +373,7 @@ class UserInfoFragmentNewExtraLayout {
         tvLastOperateAnchor.setLetterSpacing(0.05f);
         tvLastOperateAnchor.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
         tvLastOperateAnchor.setId(View.generateViewId());
-        tvLastOperateAnchor.setSingleLine(false); // 允许自动换行
+        tvLastOperateAnchor.setSingleLine(false);
         tvLastOperateAnchor.setEllipsize(null);
 
         LinearLayout.LayoutParams onlineParams = new LinearLayout.LayoutParams(
@@ -394,26 +392,6 @@ class UserInfoFragmentNewExtraLayout {
         return (int) (dp * context.getResources().getDisplayMetrics().density + 0.5f);
     }
 }
-
-
-// 你需要确保LocationTracker实现stopTracking方法
-public class LocationTracker {
-    private volatile boolean tracking = true;
-    // ... 你的成员变量和构造函数
-
-    public void startTracking(/*你的参数*/) {
-        tracking = true;
-        // 你的追踪实现，在每次循环或回调检查 tracking
-        // if (!tracking) return;
-    }
-
-    public void stopTracking() {
-        tracking = false;
-        // 其他清理逻辑（如终止线程、移除回调等）
-    }
-    // ... 其他方法
-}
-
 
 public class UserInfoFragmentNewHook {
     private static final String USER_INFO_ENTITY_CLASS = "com.soft.blued.ui.user.model.UserInfoEntity";
