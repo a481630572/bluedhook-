@@ -16,11 +16,13 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import java.io.IOException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.Locale;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import android.widget.Toast;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -39,9 +41,6 @@ import org.locationtech.proj4j.CoordinateTransform;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
@@ -567,13 +566,13 @@ public class UserInfoFragmentNewHook {
                                         amapLayout.tv_stop_location.setVisibility(View.VISIBLE); // 显示停止按钮
 
                                         NetworkManager.getInstance().getAsync(NetworkManager.getBluedSetUsersLocationApi(initialLat, initialLng),
-                                                AuthManager.auHook(false, classLoader, fl_content.getContext()), new Callback() {
+                                                null, new Callback() {
                                                     @Override
                                                     public void onFailure(@NonNull Call call, @NonNull IOException e) {}
                                                     @Override
                                                     public void onResponse(@NonNull Call call, @NonNull Response response) {
                                                         NetworkManager.getInstance().getAsync(NetworkManager.getBluedUserBasicAPI(uid),
-                                                                AuthManager.auHook(false, classLoader, fl_content.getContext()), new Callback() {
+                                                                null, new Callback() {
                                                                     @Override
                                                                     public void onFailure(@NonNull Call call, @NonNull IOException e) {}
                                                                     @Override
@@ -665,14 +664,15 @@ public class UserInfoFragmentNewHook {
                                     aMapHelper.addMarker(lat, lng, "纬度：" + lat + "\n经度：" + lng);
                                     amapLayout.tv_latitude.setText("纬度：" + lat);
                                     amapLayout.tv_longitude.setText("经度：" + lng);
+
                                     NetworkManager.getInstance().getAsync(NetworkManager.getBluedSetUsersLocationApi(lat, lng),
-                                            AuthManager.auHook(false, classLoader, fl_content.getContext()), new Callback() {
+                                            null, new Callback() {
                                                 @Override
                                                 public void onFailure(@NonNull Call call, @NonNull IOException e) {}
                                                 @Override
                                                 public void onResponse(@NonNull Call call, @NonNull Response response) {
                                                     NetworkManager.getInstance().getAsync(NetworkManager.getBluedUserBasicAPI(uid),
-                                                            AuthManager.auHook(false, classLoader, fl_content.getContext()), new Callback() {
+                                                            null, new Callback() {
                                                                 @Override
                                                                 public void onFailure(@NonNull Call call, @NonNull IOException e) {}
                                                                 @Override
@@ -739,7 +739,7 @@ public class UserInfoFragmentNewHook {
                                 userInfoFragmentNewExtra.tvLastOperateAnchor.setText(""); // 先清空
                                 NetworkManager.getInstance().getAsync(
                                         NetworkManager.getBluedLiveSearchAnchorApi(name),
-                                        AuthManager.auHook(false, classLoader, fl_content.getContext()),
+                                        null,
                                         new Callback() {
                                             @Override
                                             public void onFailure(@NonNull Call call, @NonNull IOException e) {
